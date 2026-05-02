@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeathLedger — Asset Claim Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface2: #18181c;
+    --surface3: #1e1e24;
+    --border: #2a2a32;
+    --border2: #353540;
+    --gold: #c9a84c;
+    --gold2: #e8c86d;
+    --red: #e05252;
+    --orange: #e08c3a;
+    --green: #4caf7d;
+    --text: #e8e8ec;
+    --text2: #9999aa;
+    --text3: #666675;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Playfair Display', serif;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,11,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .logo span { color: var(--text2); font-size: 0.75rem; font-family: var(--mono); font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .lang-toggle {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .lang-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active, .lang-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 5rem 3rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-eyebrow::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--text2);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+  }
+
+  /* ── STATS ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: background 0.2s;
+  }
+
+  .stat:hover { background: var(--surface2); }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text3);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 3rem 4rem;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+  }
+
+  .panel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .panel-body { padding: 1.5rem; }
+
+  /* ── FORM ELEMENTS ── */
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666675' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    transition: border-color 0.2s;
+  }
+
+  select:focus { outline: none; border-color: var(--gold); }
+
+  /* ── DROP ZONE ── */
+  .drop-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 6px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  .drop-text {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .drop-hint {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text3);
+    margin-top: 0.4rem;
+  }
+
+  .file-list {
+    margin-bottom: 1rem;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .file-item::before { content: '📄'; font-size: 0.9rem; }
+
+  /* ── CIRCULAR INFO ── */
+  .circular-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--text2);
+  }
+
+  .circular-box strong { color: var(--gold); font-family: var(--mono); font-size: 0.7rem; display: block; margin-bottom: 0.3rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.6rem;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #0a0a0b;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-download {
+    background: var(--surface2);
+    border: 1px solid var(--green);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.9rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-download:hover { background: rgba(76,175,125,0.1); }
+
+  /* ── REQUIRED DOCS ── */
+  .req-docs { margin-bottom: 0; }
+  .req-doc-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+  .req-doc-item:last-child { border-bottom: none; }
+  .req-doc-item::before { content: '○'; color: var(--text3); font-size: 0.6rem; flex-shrink: 0; }
+
+  /* ── RESULTS PANEL ── */
+  .results-panel { display: none; }
+  .results-panel.visible { display: block; }
+
+  /* ── STATUS BADGE ── */
+  .status-banner {
+    padding: 1.2rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid;
+  }
+
+  .status-banner.CRITICAL {
+    background: rgba(224,82,82,0.08);
+    border-color: var(--red);
+  }
+
+  .status-banner.MINOR {
+    background: rgba(224,140,58,0.08);
+    border-color: var(--orange);
+  }
+
+  .status-banner.OK {
+    background: rgba(76,175,125,0.08);
+    border-color: var(--green);
+  }
+
+  .status-badge {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.8rem;
+    border-radius: 3px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .CRITICAL .status-badge { background: var(--red); color: white; }
+  .MINOR .status-badge { background: var(--orange); color: white; }
+  .OK .status-badge { background: var(--green); color: white; }
+
+  .status-msg { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    gap: 0;
+  }
+
+  .tab {
+    padding: 0.8rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    white-space: nowrap;
+  }
+
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── CONTRADICTION TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td.name-cell {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  td.doc-cell {
+    font-size: 0.75rem;
+    color: var(--text3);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  td.score-cell {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .score-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .pill-CRITICAL { background: rgba(224,82,82,0.15); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
+  .pill-MINOR { background: rgba(224,140,58,0.15); color: var(--orange); border: 1px solid rgba(224,140,58,0.3); }
+  .pill-OK { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+
+  /* ── MISSING DOCS ── */
+  .missing-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.75rem 1rem;
+    background: rgba(224,82,82,0.06);
+    border: 1px solid rgba(224,82,82,0.2);
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--red);
+  }
+
+  .missing-item::before { content: '✕'; font-weight: 700; flex-shrink: 0; }
+
+  .present-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.75rem 1rem;
+    background: rgba(76,175,125,0.06);
+    border: 1px solid rgba(76,175,125,0.2);
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--green);
+  }
+
+  .present-item::before { content: '✓'; font-weight: 700; flex-shrink: 0; }
+
+  /* ── CLAIM LETTER ── */
+  .letter-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text2);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  /* ── WHATSAPP ── */
+  .whatsapp-box {
+    background: #075E54;
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: #ECE5DD;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #ECE5DD;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+
+  .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* ── EXTRACTED INFO ── */
+  .extracted-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .extracted-filename {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .extracted-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+  }
+
+  .extracted-key {
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    min-width: 60px;
+    flex-shrink: 0;
+    padding-top: 0.05rem;
+  }
+
+  .extracted-val { color: var(--text2); }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    display: none;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .progress-wrap.visible { display: block; }
+
+  .progress-steps { margin-top: 1.5rem; }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text3);
+    transition: color 0.3s;
+  }
+
+  .progress-step.done { color: var(--green); }
+  .progress-step.active { color: var(--gold); }
+
+  .step-icon { width: 20px; text-align: center; flex-shrink: 0; }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SECTION DIVIDER ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── FADE IN ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeUp 0.4s ease forwards; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 0 1.5rem; }
+    .hero, .main { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    ⚖ DeathLedger
+    <span>| Asset Claim Platform</span>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('hi')">हि</button>
+    <button class="lang-btn" onclick="setLang('kn')">ಕ</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Team Dispossible · NMIT Bengaluru · Vibe-a-thon 2026</div>
+  <h1 data-i18n="hero_title">From a pile of scanned<br>documents to a <em>court-ready</em><br>claim packet in 5 minutes.</h1>
+  <p class="hero-sub" data-i18n="hero_sub">When someone dies, families face 14–36 months of paperwork, Rs.50,000+ in legal fees, and claims rejected for name mismatches a computer can spot in seconds.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num">2.3 Cr</span>
+      <span class="stat-label" data-i18n="stat1">Death claims/year in India</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">14–36 mo</span>
+      <span class="stat-label" data-i18n="stat2">Average settlement time</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">₹50,000+</span>
+      <span class="stat-label" data-i18n="stat3">Average legal fees per family</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">₹65,000 Cr</span>
+      <span class="stat-label" data-i18n="stat4">Inheritance bottleneck</span>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT: CONTROLS -->
+  <div>
+    <!-- Institution Select -->
+    <div class="panel" style="margin-bottom: 1.2rem;">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title" data-i18n="select_institution">Select Institution</span>
+      </div>
+      <div class="panel-body">
+        <label data-i18n="institution_label">Institution</label>
+        <select id="institutionSelect" onchange="updateRules()">
+          {% for inst in institutions %}
+          <option value="{{ inst }}">{{ inst }}</option>
+          {% endfor %}
+        </select>
+
+        <div class="circular-box" id="circularBox">
+          <strong>Regulatory Reference</strong>
+          <span id="circularText">Loading...</span>
+          <div style="margin-top:0.5rem; color: var(--text3);" id="notesText"></div>
+        </div>
+
+        <div class="section-label" data-i18n="required_docs">Required Documents</div>
+        <div class="req-docs" id="reqDocsList"></div>
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <div class="panel" style="margin-bottom: 1.2rem;">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <span class="panel-title" data-i18n="upload_docs">Upload Documents</span>
+      </div>
+      <div class="panel-body">
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.tiff,.tif,.bmp" onchange="handleFiles(this.files)">
+          <span class="drop-icon">📂</span>
+          <div class="drop-text" data-i18n="drop_text">Drop scanned documents here<br>or click to browse</div>
+          <div class="drop-hint">PDF · JPG · PNG · TIFF — English · हिंदी · ಕನ್ನಡ</div>
+        </div>
+        <div class="file-list" id="fileList"></div>
+
+        <button class="btn btn-primary" id="processBtn" onclick="processDocuments()" data-i18n="process_btn">⚡ Process Documents</button>
+        <button class="btn btn-secondary" onclick="loadDemo()" data-i18n="demo_btn">🎯 Load Demo Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+
+    <!-- Progress -->
+    <div class="panel progress-wrap" id="progressWrap">
+      <div class="panel-body" style="text-align:center; padding: 2rem;">
+        <div class="spinner"></div>
+        <div style="margin-top:1.2rem; font-family:var(--mono); font-size:0.75rem; color:var(--text3);" id="progressLabel">Initialising...</div>
+        <div class="progress-steps" id="progressSteps">
+          <div class="progress-step" id="step1"><span class="step-icon">◯</span><span data-i18n="step1">Reading documents with OCR</span></div>
+          <div class="progress-step" id="step2"><span class="step-icon">◯</span><span data-i18n="step2">Checking name contradictions</span></div>
+          <div class="progress-step" id="step3"><span class="step-icon">◯</span><span data-i18n="step3">Checking missing documents</span></div>
+          <div class="progress-step" id="step4"><span class="step-icon">◯</span><span data-i18n="step4">Claude AI writing claim letter</span></div>
+          <div class="progress-step" id="step5"><span class="step-icon">◯</span><span data-i18n="step5">Generating PDF packet</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-panel" id="resultsPanel">
+
+      <!-- Status Banner -->
+      <div class="status-banner fade-in" id="statusBanner">
+        <span class="status-badge" id="statusBadge"></span>
+        <span class="status-msg" id="statusMsg"></span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="panel fade-in">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('checklist')" data-i18n="tab_checklist">📋 Checklist</button>
+          <button class="tab" onclick="switchTab('contradictions')" data-i18n="tab_contradictions">🔍 Contradictions</button>
+          <button class="tab" onclick="switchTab('letter')" data-i18n="tab_letter">📝 Claim Letter</button>
+          <button class="tab" onclick="switchTab('extracted')" data-i18n="tab_extracted">🗃 Extracted Data</button>
+          <button class="tab" onclick="switchTab('whatsapp')" data-i18n="tab_whatsapp">📱 WhatsApp</button>
+        </div>
+
+        <div class="panel-body">
+
+          <!-- Checklist Tab -->
+          <div class="tab-content active" id="tab-checklist">
+            <div id="checklistContent"></div>
+          </div>
+
+          <!-- Contradictions Tab -->
+          <div class="tab-content" id="tab-contradictions">
+            <div class="table-wrap">
+              <table id="contradictionTable">
+                <thead>
+                  <tr>
+                    <th>Document 1</th>
+                    <th>Name Found</th>
+                    <th>Document 2</th>
+                    <th>Name Found</th>
+                    <th style="text-align:center">Score</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="contradictionBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Letter Tab -->
+          <div class="tab-content" id="tab-letter">
+            <div class="letter-box" id="letterContent"></div>
+          </div>
+
+          <!-- Extracted Tab -->
+          <div class="tab-content" id="tab-extracted">
+            <div id="extractedContent"></div>
+          </div>
+
+          <!-- WhatsApp Tab -->
+          <div class="tab-content" id="tab-whatsapp">
+            <div class="whatsapp-box" style="position:relative;">
+              <button class="copy-btn" onclick="copyWhatsApp()">Copy</button>
+              <div id="whatsappContent"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Download -->
+      <div style="margin-top:1rem;" class="fade-in">
+        <a class="btn-download" href="/api/download" id="downloadBtn">
+          📥 <span data-i18n="download_btn">Download Claim Packet PDF</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Empty state -->
+    <div class="panel" id="emptyState">
+      <div class="panel-body" style="padding: 4rem 2rem; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:1rem;">⚖</div>
+        <div style="font-family:var(--serif); font-size:1.2rem; color:var(--text2); margin-bottom:0.5rem;" data-i18n="empty_title">Ready to process</div>
+        <div style="font-size:0.82rem; color:var(--text3);" data-i18n="empty_sub">Upload documents or load Demo Mode to begin</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── I18N ────────────────────────────────────────────────────
+const i18n = {
+  en: {
+    hero_title: null, // uses HTML
+    hero_sub: "When someone dies, families face 14–36 months of paperwork, ₹50,000+ in legal fees, and claims rejected for name mismatches a computer can spot in seconds.",
+    stat1: "Death claims/year in India", stat2: "Average settlement time",
+    stat3: "Average legal fees per family", stat4: "Inheritance bottleneck",
+    select_institution: "Select Institution", institution_label: "Institution",
+    required_docs: "Required Documents", upload_docs: "Upload Documents",
+    drop_text: "Drop scanned documents here<br>or click to browse",
+    process_btn: "⚡ Process Documents", demo_btn: "🎯 Load Demo Mode",
+    step1: "Reading documents with OCR", step2: "Checking name contradictions",
+    step3: "Checking missing documents", step4: "Claude AI writing claim letter",
+    step5: "Generating PDF packet",
+    tab_checklist: "📋 Checklist", tab_contradictions: "🔍 Contradictions",
+    tab_letter: "📝 Claim Letter", tab_extracted: "🗃 Extracted Data", tab_whatsapp: "📱 WhatsApp",
+    download_btn: "Download Claim Packet PDF",
+    empty_title: "Ready to process", empty_sub: "Upload documents or load Demo Mode to begin",
+  },
+  hi: {
+    hero_sub: "जब किसी की मृत्यु होती है, परिवार को 14-36 महीने कागजी कार्रवाई, ₹50,000+ कानूनी शुल्क, और नाम की गलतियों से दावे अस्वीकार होने का सामना करना पड़ता है।",
+    stat1: "भारत में मृत्यु दावे/वर्ष", stat2: "औसत निपटान समय",
+    stat3: "प्रति परिवार औसत कानूनी शुल्क", stat4: "विरासत अड़चन",
+    select_institution: "संस्था चुनें", institution_label: "संस्था",
+    required_docs: "आवश्यक दस्तावेज़", upload_docs: "दस्तावेज़ अपलोड करें",
+    drop_text: "स्कैन किए दस्तावेज़ यहाँ छोड़ें<br>या ब्राउज़ करें",
+    process_btn: "⚡ दस्तावेज़ प्रोसेस करें", demo_btn: "🎯 डेमो मोड लोड करें",
+    step1: "OCR से दस्तावेज़ पढ़े जा रहे हैं", step2: "नाम विरोधाभास जांचा जा रहा है",
+    step3: "लापता दस्तावेज़ जांचे जा रहे हैं", step4: "Claude AI पत्र लिख रहा है",
+    step5: "PDF पैकेट बनाया जा रहा है",
+    tab_checklist: "📋 चेकलिस्ट", tab_contradictions: "🔍 विरोधाभास",
+    tab_letter: "📝 दावा पत्र", tab_extracted: "🗃 निकाला डेटा", tab_whatsapp: "📱 WhatsApp",
+    download_btn: "क्लेम पैकेट PDF डाउनलोड करें",
+    empty_title: "प्रोसेस के लिए तैयार", empty_sub: "शुरू करने के लिए दस्तावेज़ अपलोड करें या डेमो मोड लोड करें",
+  },
+  kn: {
+    hero_sub: "ಯಾರಾದರೂ ನಿಧನರಾದಾಗ, ಕುಟುಂಬಗಳು 14-36 ತಿಂಗಳ ದಾಖಲೆ ಕೆಲಸ, ₹50,000+ ಕಾನೂನು ಶುಲ್ಕ ಮತ್ತು ಹೆಸರಿನ ತಪ್ಪುಗಳಿಂದ ತಿರಸ್ಕರಿಸಲ್ಪಟ್ಟ ದಾವೆಗಳನ್ನು ಎದುರಿಸುತ್ತಾರೆ.",
+    stat1: "ಭಾರತದಲ್ಲಿ ಮರಣ ದಾವೆ/ವರ್ಷ", stat2: "ಸರಾಸರಿ ಇತ್ಯರ್ಥ ಸಮಯ",
+    stat3: "ಕುಟುಂಬಕ್ಕೆ ಸರಾಸರಿ ಕಾನೂನು ಶುಲ್ಕ", stat4: "ಆನುವಂಶಿಕ ತಡೆ",
+    select_institution: "ಸಂಸ್ಥೆ ಆಯ್ಕೆ ಮಾಡಿ", institution_label: "ಸಂಸ್ಥೆ",
+    required_docs: "ಅಗತ್ಯ ದಾಖಲೆಗಳು", upload_docs: "ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    drop_text: "ಸ್ಕ್ಯಾನ್ ಮಾಡಿದ ದಾಖಲೆಗಳನ್ನು ಇಲ್ಲಿ ಬಿಡಿ<br>ಅಥವಾ ಬ್ರೌಸ್ ಮಾಡಿ",
+    process_btn: "⚡ ದಾಖಲೆಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಿ", demo_btn: "🎯 ಡೆಮೋ ಮೋಡ್ ಲೋಡ್ ಮಾಡಿ",
+    step1: "OCR ಮೂಲಕ ದಾಖಲೆಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ", step2: "ಹೆಸರಿನ ವಿರೋಧಾಭಾಸ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ",
+    step3: "ಕಾಣೆಯಾದ ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ", step4: "Claude AI ಪತ್ರ ಬರೆಯುತ್ತಿದೆ",
+    step5: "PDF ಪ್ಯಾಕೆಟ್ ರಚಿಸಲಾಗುತ್ತಿದೆ",
+    tab_checklist: "📋 ಪಟ್ಟಿ", tab_contradictions: "🔍 ವಿರೋಧಾಭಾಸ",
+    tab_letter: "📝 ದಾವೆ ಪತ್ರ", tab_extracted: "🗃 ಹೊರತೆಗೆದ ಡೇಟಾ", tab_whatsapp: "📱 WhatsApp",
+    download_btn: "ಕ್ಲೇಮ್ ಪ್ಯಾಕೆಟ್ PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    empty_title: "ಪ್ರಕ್ರಿಯೆಗೆ ಸಿದ್ಧ", empty_sub: "ಪ್ರಾರಂಭಿಸಲು ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = i18n[lang]?.[key] || i18n['en'][key];
+    if (val) el.innerHTML = val;
+  });
+}
+
+// ── RULES ────────────────────────────────────────────────────
+async function updateRules() {
+  const inst = document.getElementById('institutionSelect').value;
+  const r = await fetch(`/api/rules/${encodeURIComponent(inst)}`).then(x => x.json());
+  document.getElementById('circularText').textContent = r.circular || 'N/A';
+  document.getElementById('notesText').textContent = r.notes || '';
+  const list = document.getElementById('reqDocsList');
+  list.innerHTML = (r.required_docs || []).map(d =>
+    `<div class="req-doc-item">${d}</div>`
+  ).join('');
+}
+
+// ── FILES ────────────────────────────────────────────────────
+let selectedFiles = [];
+
+function handleFiles(files) {
+  selectedFiles = Array.from(files);
+  renderFileList();
+}
+
+function renderFileList() {
+  const el = document.getElementById('fileList');
+  el.innerHTML = selectedFiles.map(f => `<div class="file-item">${f.name}</div>`).join('');
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+
+// ── DEMO ────────────────────────────────────────────────────
+function loadDemo() {
+  selectedFiles = [];
+  document.getElementById('fileList').innerHTML = `
+    <div class="file-item">death_certificate.pdf</div>
+    <div class="file-item">bank_passbook_SBI.pdf</div>
+    <div class="file-item">aadhaar_card.pdf</div>
+  `;
+  window._demoMode = true;
+}
+
+// ── PROGRESS ────────────────────────────────────────────────
+function showProgress(step) {
+  const steps = ['step1','step2','step3','step4','step5'];
+  const labels = {
+    en: ['Reading documents...','Checking contradictions...','Checking missing docs...','Claude AI writing letter...','Generating PDF...'],
+    hi: ['दस्तावेज़ पढ़े जा रहे हैं...','विरोधाभास जांचा जा रहा है...','लापता दस्तावेज़...','पत्र लिखा जा रहा है...','PDF बनाया जा रहा है...'],
+    kn: ['ದಾಖಲೆಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ...','ವಿರೋಧಾಭಾಸ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...','ಕಾಣೆಯಾದ ದಾಖಲೆಗಳು...','ಪತ್ರ ಬರೆಯಲಾಗುತ್ತಿದೆ...','PDF ರಚಿಸಲಾಗುತ್ತಿದೆ...']
+  };
+  document.getElementById('progressLabel').textContent = (labels[currentLang] || labels.en)[step] || '';
+  steps.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('done', 'active');
+    if (i < step) { el.classList.add('done'); el.querySelector('.step-icon').textContent = '✓'; }
+    else if (i === step) { el.classList.add('active'); el.querySelector('.step-icon').textContent = '►'; }
+    else el.querySelector('.step-icon').textContent = '◯';
+  });
+}
+
+// ── PROCESS ─────────────────────────────────────────────────
+async function processDocuments() {
+  const inst = document.getElementById('institutionSelect').value;
+  const isDemoMode = window._demoMode || selectedFiles.length === 0;
+
+  if (!isDemoMode && selectedFiles.length === 0) {
+    alert('Please upload documents or load Demo Mode first.');
+    return;
+  }
+
+  // Show progress
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsPanel').classList.remove('visible');
+  document.getElementById('progressWrap').classList.add('visible', 'panel');
+  document.getElementById('processBtn').disabled = true;
+
+  // Simulate step progression while waiting
+  let stepInterval = 0;
+  const stepTimer = setInterval(() => {
+    if (stepInterval < 4) { showProgress(stepInterval); stepInterval++; }
+  }, 800);
+
+  const formData = new FormData();
+  formData.append('institution', inst);
+  formData.append('demo_mode', isDemoMode ? 'true' : 'false');
+  if (!isDemoMode) {
+    selectedFiles.forEach(f => formData.append('documents', f));
+  }
+
+  try {
+    const resp = await fetch('/api/process', { method: 'POST', body: formData });
+    const data = await resp.json();
+    clearInterval(stepTimer);
+    showProgress(4);
+    await new Promise(r => setTimeout(r, 600));
+
+    // Hide progress, show results
+    document.getElementById('progressWrap').classList.remove('visible', 'panel');
+    renderResults(data);
+    document.getElementById('resultsPanel').classList.add('visible');
+    window._demoMode = false;
+  } catch(e) {
+    clearInterval(stepTimer);
+    document.getElementById('progressWrap').classList.remove('visible', 'panel');
+    document.getElementById('emptyState').style.display = '';
+    alert('Error: ' + e.message);
+  }
+
+  document.getElementById('processBtn').disabled = false;
+}
+
+// ── RENDER RESULTS ───────────────────────────────────────────
+function renderResults(data) {
+  // Status banner
+  const banner = document.getElementById('statusBanner');
+  banner.className = `status-banner fade-in ${data.overall}`;
+  document.getElementById('statusBadge').textContent = data.overall;
+  const msgs = {
+    CRITICAL: '🔴 Critical name mismatches found. Claim will be rejected without an affidavit.',
+    MINOR: '🟡 Minor name variations detected. Recommend getting a clarifying affidavit.',
+    OK: '🟢 All document names are consistent. Ready to submit.'
+  };
+  document.getElementById('statusMsg').textContent = msgs[data.overall] || '';
+
+  // Checklist
+  const missing = data.missing_docs || [];
+  const required = data.required_docs || [];
+  let checkHtml = '';
+  required.forEach(doc => {
+    if (missing.includes(doc)) {
+      checkHtml += `<div class="missing-item">${doc}</div>`;
+    } else {
+      checkHtml += `<div class="present-item">${doc}</div>`;
+    }
+  });
+  if (missing.length === 0) {
+    checkHtml = `<div style="padding:1rem; color:var(--green); font-size:0.85rem;">✓ All required documents are present.</div>` + checkHtml;
+  }
+  document.getElementById('checklistContent').innerHTML = checkHtml;
+
+  // Contradiction table
+  const tbody = document.getElementById('contradictionBody');
+  const comparisons = data.comparisons || [];
+  if (comparisons.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text3); padding:2rem;">Upload at least 2 documents to see comparisons.</td></tr>`;
+  } else {
+    tbody.innerHTML = comparisons.map(c => {
+      const scoreColor = c.status === 'CRITICAL' ? 'var(--red)' : c.status === 'MINOR' ? 'var(--orange)' : 'var(--green)';
+      return `
+        <tr>
+          <td class="doc-cell" title="${c.doc1}">${c.doc1}</td>
+          <td class="name-cell" title="${c.name1}">${c.name1}</td>
+          <td class="doc-cell" title="${c.doc2}">${c.doc2}</td>
+          <td class="name-cell" title="${c.name2}">${c.name2}</td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track">
+                <div class="score-fill" style="width:${c.score}%; background:${scoreColor};"></div>
+              </div>
+              <span style="font-family:var(--mono); font-size:0.78rem; color:${scoreColor}; min-width:36px; text-align:right;">${c.score}%</span>
+            </div>
+          </td>
+          <td><span class="pill pill-${c.status}">${c.status}</span></td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Letter
+  document.getElementById('letterContent').textContent = data.claim_letter || '';
+
+  // Extracted
+  const extracted = data.extracted || [];
+  document.getElementById('extractedContent').innerHTML = extracted.map(e => `
+    <div class="extracted-card">
+      <div class="extracted-filename">📄 ${e.filename}</div>
+      <div class="extracted-row"><span class="extracted-key">Names</span><span class="extracted-val">${e.names.length ? e.names.join(', ') : '—'}</span></div>
+      <div class="extracted-row"><span class="extracted-key">Dates</span><span class="extracted-val">${e.dates.length ? e.dates.join(', ') : '—'}</span></div>
+      <div class="extracted-row"><span class="extracted-key">Aadhaar</span><span class="extracted-val">${e.aadhaar.length ? e.aadhaar.join(', ') : '—'}</span></div>
+      <div class="extracted-row"><span class="extracted-key">PAN</span><span class="extracted-val">${e.pan.length ? e.pan.join(', ') : '—'}</span></div>
+    </div>
+  `).join('');
+
+  // WhatsApp
+  document.getElementById('whatsappContent').textContent = data.whatsapp_text || '';
+}
+
+// ── TABS ────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// ── COPY ────────────────────────────────────────────────────
+function copyWhatsApp() {
+  const text = document.getElementById('whatsappContent').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+// ── INIT ────────────────────────────────────────────────────
+updateRules();
+</script>
+</body>
+</html>

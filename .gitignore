@@ -1,0 +1,27 @@
+# Node
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+.vercel
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.env.local
+.venv
+env/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Misc
+.gemini
