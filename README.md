@@ -108,5 +108,5 @@ Goal: **help users walk into a bank fully prepared the first time.**
 - Sanchali Parikh - Frontend  
 - Jagriti Kesarwani -  Backend
 - Adit Jain - Ai logic, Github action setup
-- Mizba Khanum — UI/UX andResearch  
+- Mizba Khanum - UI/UX andResearch  
 
