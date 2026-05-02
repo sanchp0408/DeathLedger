@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import jsPDF from 'jspdf';
 import { useDropzone } from 'react-dropzone';
 import { useAuditStore } from '@/store/auditStore';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -198,22 +199,29 @@ export default function AuditorSplitScreen() {
       // Backend not running – fall through to client-side fallback
     }
 
-    // 2. Client-side fallback: generate a text summary the browser can download
+    // 2. Client-side fallback: generate a PDF summary the browser can download
     if (!downloaded) {
+      const doc = new jsPDF();
+      const margin = 15;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("DEATHLEDGER - CLAIM AUDIT REPORT", pageWidth / 2, 20, { align: 'center' });
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      
       const lines: string[] = [
-        '============================================================',
-        '         DEATHLEDGER — CLAIM AUDIT REPORT',
-        '============================================================',
-        '',
-        `Institution : ${auditResult.institution}`,
-        `Overall     : ${auditResult.summary.overallStatus}`,
-        `Critical    : ${auditResult.summary.criticalCount}`,
-        `Minor       : ${auditResult.summary.minorCount}`,
-        `OK          : ${auditResult.summary.okCount}`,
+        `Institution: ${auditResult.institution}`,
+        `Overall Status: ${auditResult.summary.overallStatus}`,
+        `Critical Issues: ${auditResult.summary.criticalCount}`,
+        `Minor Issues: ${auditResult.summary.minorCount}`,
+        `Perfect Matches: ${auditResult.summary.okCount}`,
         '',
         '--- DOCUMENT COMPARISONS ---',
         ...auditResult.comparisons.map(
-          (c) => `• ${c.docA} vs ${c.docB}  |  "${c.nameA}" ↔ "${c.nameB}"  |  ${c.score}%  [${c.severity}]`
+          (c) => `• ${c.docA} vs ${c.docB}  |  "${c.nameA}" <-> "${c.nameB}"  |  ${c.score}%  [${c.severity}]`
         ),
         '',
         '--- MISSING DOCUMENTS ---',
@@ -222,21 +230,14 @@ export default function AuditorSplitScreen() {
           : ['• None']),
         '',
         '--- REGULATORY ---',
-        `Circular : ${auditResult.regulatory?.circular ?? 'RBI/2025-26/95'}`,
-        `SLA Days : ${auditResult.regulatory?.sladays ?? 15}`,
-        '',
-        '============================================================',
-        'NOTE: Start the Flask backend (python app.py) for a full PDF',
-        '============================================================',
+        `Circular: ${auditResult.regulatory?.circular ?? 'RBI/2025-26/95'}`,
+        `SLA Days: ${auditResult.regulatory?.sladays ?? 15}`,
       ];
 
-      const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `DeathLedger_Claim_${auditResult.institution}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const splitText = doc.splitTextToSize(lines.join('\n'), pageWidth - (margin * 2));
+      doc.text(splitText, margin, 35);
+      
+      doc.save(`DeathLedger_Claim_${auditResult.institution}.pdf`);
     }
 
     setLoading(false);
