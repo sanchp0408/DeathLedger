@@ -15,6 +15,7 @@ import WhatsAppShare from './WhatsAppShare';
 import { motion } from 'framer-motion';
 import { maskPrivacyData } from '@/lib/formatters';
 import { FileText, ShieldAlert, CheckCircle, Search, Download, Share2, FileWarning, Clock, UserCheck, Phone, Scale, AlertTriangle, FolderUp, Image as ImageIcon } from 'lucide-react';
+import TextToSpeech from './TextToSpeech';
 
 interface UploadedFile {
   file: File;
@@ -244,6 +245,47 @@ export default function AuditorSplitScreen() {
 
   const simplifiedProcedure = claimAmount !== null && claimAmount < 1500000;
   const hasCritical = auditResult && auditResult.summary.criticalCount > 0;
+
+  const getSummaryText = () => {
+    if (!auditResult) return '';
+    const name = auditResult.claimant.name;
+    const institution = auditResult.institution;
+    const status = auditResult.summary.overallStatus;
+    const critical = auditResult.summary.criticalCount;
+    const minor = auditResult.summary.minorCount;
+    const ok = auditResult.summary.okCount;
+    const missingCount = auditResult.missingDocuments.length;
+    
+    if (store.language === 'hi') {
+      let text = `${institution} में ${name} के लिए ऑडिट सारांश। समग्र स्थिति ${status} है। `;
+      text += `${ok} सही मिलान, ${minor} छोटी समस्याएं, और ${critical} गंभीर असंगतियां हैं। `;
+      
+      if (missingCount > 0) {
+        text += `${missingCount} दस्तावेज़ गायब हैं। `;
+      }
+      
+      if (critical > 0) {
+        text += "गंभीर असंगतियों को हल करने के लिए एक हलफनामे की आवश्यकता है।";
+      } else {
+        text += "किसी हलफनामे की आवश्यकता नहीं है। आप अपना दावा प्रस्तुत करने के लिए तैयार हैं।";
+      }
+      return text;
+    } else {
+      let text = `Audit summary for ${name} at ${institution}. The overall status is ${status}. `;
+      text += `There are ${ok} perfect matches, ${minor} minor issues, and ${critical} critical mismatches. `;
+      
+      if (missingCount > 0) {
+        text += `There are ${missingCount} missing documents. `;
+      }
+      
+      if (critical > 0) {
+        text += "An affidavit is required to resolve the critical mismatches.";
+      } else {
+        text += "No affidavit is needed. You are ready to submit your claim.";
+      }
+      return text;
+    }
+  };
 
   return (
     <>
@@ -553,10 +595,13 @@ export default function AuditorSplitScreen() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
                     <div className="label-caps">{t.auditSummary}</div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', marginTop: '2px' }}>
-                      {auditResult.claimant.name} — {auditResult.institution}
-                    </h3>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '2px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', margin: 0 }}>
+                        {auditResult.claimant.name} — {auditResult.institution}
+                      </h3>
+                      <TextToSpeech text={getSummaryText()} lang={store.language} />
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '6px' }}>
                       {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </div>
                   </div>
