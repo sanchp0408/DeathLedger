@@ -115,10 +115,20 @@ export default function AuditorSplitScreen() {
       formData.append('institution', institution);
       formData.append('demo_mode', 'false');
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/process`, {
-        method: 'POST',
-        body: formData,
-      });
+      // Try FastAPI first, fallback to Flask
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+      let res;
+      try {
+        res = await fetch(`${apiUrl}/process-docs`, {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        res = await fetch(`http://localhost:5000/api/process`, {
+          method: 'POST',
+          body: formData,
+        });
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -175,17 +185,47 @@ export default function AuditorSplitScreen() {
 
     let downloaded = false;
 
-    // 1. Try the Flask backend first (only works when python app.py is running)
+    // 1. Try the FastAPI backend first, then fallback to Flask
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/download`,
-        { method: 'GET', signal: controller.signal }
-      );
+      const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+      
+      const payload = {
+        institution: auditResult.institution,
+        comparisons: auditResult.comparisons.map((c) => ({
+          doc1: c.docA,
+          doc2: c.docB,
+          name1: c.nameA,
+          name2: c.nameB,
+          score: c.score,
+          severity: c.severity,
+          status: c.severity,
+        })),
+        missing_docs: auditResult.missingDocuments,
+        claim_letter: "Please process this claim under the relevant RBI guidelines.",
+      };
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+      let res;
+      
+      try {
+        res = await fetch(`${apiUrl}/download`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+      } catch (err) {
+        // Fallback to Flask backend GET
+        res = await fetch(`http://localhost:5000/api/download`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+      }
+      
       clearTimeout(timeout);
 
-      if (res.ok) {
+      if (res && res.ok) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
