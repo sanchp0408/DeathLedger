@@ -59,8 +59,10 @@ export const DEMO_AUDIT_RESULT: AuditResult = {
   extractedNames: {
     'Death Certificate': 'Rajesh Kumar',
     'Aadhaar Card': 'Rajesh Kumar',
+    'Aadhaar Number': '1234 5678 9012',
     'Bank Passbook': 'R. Kumar',
     'PAN Card': 'Rajesh Kumar Sharma',
+    'PAN Number': 'ABCDE1234F',
   },
   comparisons: [
     {

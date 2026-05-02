@@ -2,6 +2,7 @@ import os
 import json
 import base64
 from flask import Flask, render_template, request, jsonify, send_file
+from flask_cors import CORS
 from dotenv import load_dotenv
 import io
 
@@ -15,6 +16,7 @@ from claim_letter import generate_claim_letter, generate_whatsapp_summary
 from pdf_generator import generate_pdf_packet
 
 app = Flask(__name__)
+CORS(app)
 
 # Store last generated PDF in memory (for download)
 _last_pdf = {}

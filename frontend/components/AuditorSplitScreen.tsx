@@ -12,6 +12,9 @@ import NomineeRoute from './NomineeRoute';
 import SLACountdown from './SLACountdown';
 import AffidavitModal from './AffidavitModal';
 import WhatsAppShare from './WhatsAppShare';
+import { motion } from 'framer-motion';
+import { maskPrivacyData } from '@/lib/formatters';
+import { FileText, ShieldAlert, CheckCircle, Search, Download, Share2, FileWarning, Clock, UserCheck, Phone, Scale, AlertTriangle, FolderUp, Image as ImageIcon } from 'lucide-react';
 
 interface UploadedFile {
   file: File;
@@ -110,7 +113,7 @@ export default function AuditorSplitScreen() {
       formData.append('institution', institution);
       formData.append('demo_mode', 'false');
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/process-docs`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/process`, {
         method: 'POST',
         body: formData,
       });
@@ -165,23 +168,21 @@ export default function AuditorSplitScreen() {
   const downloadPacket = async () => {
     if (!auditResult) return;
     
+    setLoading(true);
+    setLoadingStep('Generating packet...');
+
+    let downloaded = false;
+
+    // 1. Try the Flask backend first (only works when python app.py is running)
     try {
-      setLoading(true);
-      setLoadingStep('Generating packet...');
-      
-      const payload = {
-        institution: auditResult.institution,
-        comparisons: auditResult.comparisons,
-        missing_docs: auditResult.missingDocuments,
-        claim_letter: 'Dear Sir/Madam,\n\nPlease process this claim.\n\nRegards,\nClaimant' // In a real app we'd get this from Claude API
-      };
-      
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/download`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/download`,
+        { method: 'GET', signal: controller.signal }
+      );
+      clearTimeout(timeout);
+
       if (res.ok) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
@@ -190,13 +191,55 @@ export default function AuditorSplitScreen() {
         a.download = `DeathLedger_Claim_${auditResult.institution}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
+        downloaded = true;
       }
-    } catch (e) {
-      console.error("Download failed", e);
-    } finally {
-      setLoading(false);
-      setLoadingStep('');
+    } catch {
+      // Backend not running – fall through to client-side fallback
     }
+
+    // 2. Client-side fallback: generate a text summary the browser can download
+    if (!downloaded) {
+      const lines: string[] = [
+        '============================================================',
+        '         DEATHLEDGER — CLAIM AUDIT REPORT',
+        '============================================================',
+        '',
+        `Institution : ${auditResult.institution}`,
+        `Overall     : ${auditResult.summary.overallStatus}`,
+        `Critical    : ${auditResult.summary.criticalCount}`,
+        `Minor       : ${auditResult.summary.minorCount}`,
+        `OK          : ${auditResult.summary.okCount}`,
+        '',
+        '--- DOCUMENT COMPARISONS ---',
+        ...auditResult.comparisons.map(
+          (c) => `• ${c.docA} vs ${c.docB}  |  "${c.nameA}" ↔ "${c.nameB}"  |  ${c.score}%  [${c.severity}]`
+        ),
+        '',
+        '--- MISSING DOCUMENTS ---',
+        ...(auditResult.missingDocuments.length > 0
+          ? auditResult.missingDocuments.map((d) => `• ${d}`)
+          : ['• None']),
+        '',
+        '--- REGULATORY ---',
+        `Circular : ${auditResult.regulatory?.circular ?? 'RBI/2025-26/95'}`,
+        `SLA Days : ${auditResult.regulatory?.sladays ?? 15}`,
+        '',
+        '============================================================',
+        'NOTE: Start the Flask backend (python app.py) for a full PDF',
+        '============================================================',
+      ];
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DeathLedger_Claim_${auditResult.institution}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    setLoading(false);
+    setLoadingStep('');
   };
 
   const simplifiedProcedure = claimAmount !== null && claimAmount < 1500000;
@@ -213,7 +256,7 @@ export default function AuditorSplitScreen() {
         <div
           className="split-left"
           style={{
-            width: '42%',
+            flex: 1,
             borderRight: '1px solid var(--color-border)',
             overflowY: 'auto',
             padding: '24px',
@@ -250,8 +293,8 @@ export default function AuditorSplitScreen() {
               ))}
             </div>
             {institution && (
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '6px' }}>
-                {INSTITUTION_RULES[institution].name} • SLA: {INSTITUTION_RULES[institution].sladays} days • 📞 {INSTITUTION_RULES[institution].contact}
+              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {INSTITUTION_RULES[institution].name} • SLA: {INSTITUTION_RULES[institution].sladays} days • <Phone size={12} /> {INSTITUTION_RULES[institution].contact}
               </div>
             )}
           </div>
@@ -273,8 +316,8 @@ export default function AuditorSplitScreen() {
             </div>
 
             {nomineeExists && (
-              <div className="banner-info" style={{ fontSize: '12px' }}>
-                <strong>⚖️ Section 45ZA:</strong> {t.nomineeBannerText}
+              <div className="banner-info" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <strong><Scale size={14} /> Section 45ZA:</strong> {t.nomineeBannerText}
               </div>
             )}
           </div>
@@ -303,8 +346,8 @@ export default function AuditorSplitScreen() {
               />
             </div>
             {simplifiedProcedure && (
-              <div className="banner-success" style={{ marginTop: '8px', fontSize: '12px' }}>
-                ✅ {t.simplifiedProcedure}
+              <div className="banner-success" style={{ marginTop: '8px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckCircle size={14} /> {t.simplifiedProcedure}
               </div>
             )}
           </div>
@@ -337,7 +380,7 @@ export default function AuditorSplitScreen() {
               style={{ marginBottom: uploadedFiles.length > 0 ? '12px' : '0' }}
             >
               <input {...getInputProps()} />
-              <div style={{ fontSize: '32px', marginBottom: '10px' }}>📁</div>
+              <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'center' }}><FolderUp size={32} className="text-primary" /></div>
               <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
                 {isDragActive ? 'Drop files here...' : t.dropDocuments}
               </div>
@@ -362,8 +405,8 @@ export default function AuditorSplitScreen() {
                       borderRadius: 'var(--radius-sm)',
                     }}
                   >
-                    <span style={{ fontSize: '18px' }}>
-                      {f.name.endsWith('.pdf') ? '📄' : '🖼️'}
+                    <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center' }}>
+                      {f.name.endsWith('.pdf') ? <FileText size={18} /> : <ImageIcon size={18} />}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -430,7 +473,8 @@ export default function AuditorSplitScreen() {
         <div
           className="split-right"
           style={{
-            flex: 1,
+            width: '450px',
+            minWidth: '450px',
             overflowY: 'auto',
             padding: '24px',
             display: 'flex',
@@ -450,7 +494,9 @@ export default function AuditorSplitScreen() {
               color: 'var(--color-text-muted)',
               gap: '16px',
             }}>
-              <div style={{ fontSize: '64px' }}>📊</div>
+              <div style={{ fontSize: '48px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+                <Search size={48} strokeWidth={1} />
+              </div>
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-text-primary)', marginBottom: '8px' }}>
                   Audit results will appear here
@@ -490,9 +536,20 @@ export default function AuditorSplitScreen() {
           )}
 
           {auditResult && !isLoading && (
-            <div style={{ animation: 'fadeInUp 0.4s ease' }}>
+            <motion.div 
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+            >
               {/* Section A: Summary Header */}
-              <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className={`card ${auditResult.summary.overallStatus === 'CRITICAL' ? 'animate-pulse-ring' : ''}`} style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
                     <div className="label-caps">{t.auditSummary}</div>
@@ -518,9 +575,9 @@ export default function AuditorSplitScreen() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                   {[
-                    { label: t.okMatches, count: auditResult.summary.okCount, color: 'var(--color-ok)', bg: 'var(--color-ok-bg)', icon: '✅' },
-                    { label: t.minorIssues, count: auditResult.summary.minorCount, color: 'var(--color-minor)', bg: 'var(--color-minor-bg)', icon: '⚠️' },
-                    { label: t.criticalMismatches, count: auditResult.summary.criticalCount, color: 'var(--color-critical)', bg: 'var(--color-critical-bg)', icon: '🔴' },
+                    { label: t.okMatches, count: auditResult.summary.okCount, color: 'var(--color-ok)', bg: 'var(--color-ok-bg)' },
+                    { label: t.minorIssues, count: auditResult.summary.minorCount, color: 'var(--color-minor)', bg: 'var(--color-minor-bg)' },
+                    { label: t.criticalMismatches, count: auditResult.summary.criticalCount, color: 'var(--color-critical)', bg: 'var(--color-critical-bg)' },
                   ].map((stat) => (
                     <div
                       key={stat.label}
@@ -541,26 +598,41 @@ export default function AuditorSplitScreen() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Regulatory Flags */}
               {(auditResult.regulatory.simplifiedProcedure || auditResult.regulatory.nomineeProtection) && (
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
                   {auditResult.regulatory.simplifiedProcedure && (
-                    <div className="banner-success" style={{ flex: 1, minWidth: '200px', fontSize: '12px' }}>
-                      <strong>✅ Simplified Procedure:</strong> Claim &lt; ₹15L — cite RBI/2025-26/95 Annex I-B for reduced paperwork.
+                    <div className="banner-success" style={{ flex: 1, minWidth: '200px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <strong><CheckCircle size={14} /> Simplified Procedure:</strong> Claim &lt; ₹15L — cite RBI/2025-26/95 Annex I-B for reduced paperwork.
                     </div>
                   )}
                   {auditResult.regulatory.nomineeProtection && (
-                    <div className="banner-info" style={{ flex: 1, minWidth: '200px', fontSize: '12px' }}>
-                      <strong>🛡️ Nominee Protection:</strong> Sec 45ZA applies — no Succession Certificate required.
+                    <div className="banner-info" style={{ flex: 1, minWidth: '200px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ShieldAlert size={14} /> <strong>Nominee Protection:</strong> Sec 45ZA applies — no Succession Certificate required.
                     </div>
                   )}
                 </div>
               )}
 
+              {/* Section AI: Extracted Fields */}
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '20px' }}>
+                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={18} /> AI Extracted Evidence
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {Object.entries(auditResult.extractedNames).map(([doc, name]) => (
+                    <div key={doc} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderBottom: '1px solid var(--color-border)', paddingBottom: '8px' }}>
+                      <span style={{ color: 'var(--color-text-muted)' }}>{doc}</span>
+                      <span style={{ fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{maskPrivacyData(doc.toLowerCase().includes('aadhaar') ? 'aadhaar' : doc.toLowerCase().includes('pan') ? 'pan' : 'none' as any, name)}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
               {/* Section B: Contradiction Table */}
-              <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '20px' }}>
                 <h4 style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: '17px',
@@ -569,15 +641,15 @@ export default function AuditorSplitScreen() {
                   alignItems: 'center',
                   gap: '8px',
                 }}>
-                  🔍 {t.nameContradictions}
+                  <Search size={18} /> {t.nameContradictions}
                 </h4>
                 <ContradictionTable comparisons={auditResult.comparisons} />
-              </div>
+              </motion.div>
 
               {/* Section C: Missing Documents */}
-              <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
-                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '16px' }}>
-                  📋 {t.requiredDocuments}
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '20px' }}>
+                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileWarning size={18} /> {t.requiredDocuments}
                 </h4>
                 <MissingDocAlert
                   institution={auditResult.institution}
@@ -590,26 +662,26 @@ export default function AuditorSplitScreen() {
                   }
                 />
                 {auditResult.missingDocuments.length > 0 && (
-                  <div className="banner-critical" style={{ marginTop: '12px', fontSize: '12px' }}>
-                    <strong>⚠️ Also flagged:</strong> {auditResult.missingDocuments.join(', ')}
+                  <div className="banner-critical" style={{ marginTop: '12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertTriangle size={14} /> <strong>Also flagged:</strong> {auditResult.missingDocuments.join(', ')}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Section D: Nominee Route Intelligence */}
               {auditResult.nomineeExists && (
-                <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '16px' }}>
-                    🛡️ Nominee Protection
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '20px' }}>
+                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ShieldAlert size={18} /> Nominee Protection
                   </h4>
                   <NomineeRoute nomineeExists={auditResult.nomineeExists} />
-                </div>
+                </motion.div>
               )}
 
               {/* Section E: SLA Countdown */}
-              <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
-                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '4px' }}>
-                  ⏱️ {t.settlementDeadline}
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '20px' }}>
+                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Clock size={18} /> {t.settlementDeadline}
                 </h4>
                 <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '16px' }}>
                   {t.slaSubtitle}
@@ -619,10 +691,10 @@ export default function AuditorSplitScreen() {
                   onDateChange={setSubmissionDate}
                   totalDays={INSTITUTION_RULES[auditResult.institution]?.sladays || 15}
                 />
-              </div>
+              </motion.div>
 
               {/* Section F: Actions */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 {/* Download Packet */}
                 <div className="card" style={{ padding: '16px' }}>
                   <div className="label-caps" style={{ marginBottom: '6px' }}>Claim Packet</div>
@@ -631,10 +703,10 @@ export default function AuditorSplitScreen() {
                   </p>
                   <button
                     className="btn-primary"
-                    style={{ width: '100%', justifyContent: 'center', fontSize: '13px' }}
+                    style={{ width: '100%', justifyContent: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={downloadPacket}
                   >
-                    {t.downloadPacket}
+                    <Download size={14} /> {t.downloadPacket}
                   </button>
                 </div>
 
@@ -665,17 +737,17 @@ export default function AuditorSplitScreen() {
                     </p>
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* WhatsApp Share */}
-              <div className="card" style={{ padding: '16px' }}>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: '16px' }}>
                 <div className="label-caps" style={{ marginBottom: '6px' }}>Share Summary</div>
                 <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
                   Copy a formatted summary to share via WhatsApp with family members or advisors.
                 </p>
                 <WhatsAppShare audit={auditResult} />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </div>
       </div>

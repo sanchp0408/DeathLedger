@@ -1,38 +1,35 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import FeaturesGrid from '@/components/FeaturesGrid';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'DeathLedger — Settle Death Claims Without a Lawyer',
-  description:
-    'AI-powered auditor that detects name mismatches, generates RBI-compliant claim letters, and helps Indian families navigate death claim settlements for free.',
-};
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Shield, Search, ChevronRight, Play, ArrowRight, FileText, CheckCircle2, AlertCircle, Scale, Globe, Landmark, Clock, Bot, Download, FolderUp } from 'lucide-react';
 
 export default function HomePage() {
   return (
-    <>
+    <div style={{ backgroundColor: '#F8FAFC' }}>
       {/* ===== NAV ===== */}
       <nav style={{
         position: 'sticky',
         top: 0,
-        zIndex: 40,
-        background: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--color-border)',
+        zIndex: 50,
+        background: '#004C8F', // HDFC Blue
         padding: '0 40px',
-        height: '68px',
+        height: '72px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '24px' }}>🛡️</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ background: 'white', padding: '6px', borderRadius: '4px' }}>
+            <Shield size={28} color="#ED232A" strokeWidth={2} /> {/* HDFC Red */}
+          </div>
           <span style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '22px',
-            fontWeight: 700,
-            color: 'var(--color-primary)',
-            letterSpacing: '-0.02em',
+            fontSize: '24px',
+            fontWeight: 800,
+            color: 'white',
+            letterSpacing: '0.5px',
           }}>
             DeathLedger
           </span>
@@ -41,15 +38,17 @@ export default function HomePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <nav style={{ display: 'flex', gap: '28px' }}>
             {[
-              { label: 'Home', href: '/' },
-              { label: 'How It Works', href: '#how-it-works' },
-              { label: 'Demo', href: '/audit' },
+              { label: 'Personal', href: '#' },
+              { label: 'NRI', href: '#' },
+              { label: 'SME', href: '#' },
+              { label: 'Wholesale', href: '#' },
+              { label: 'About Us', href: '#' },
             ].map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 style={{
-                  color: 'var(--color-text-secondary)',
+                  color: 'rgba(255,255,255,0.9)',
                   textDecoration: 'none',
                   fontWeight: 500,
                   fontSize: '14px',
@@ -60,379 +59,366 @@ export default function HomePage() {
               </Link>
             ))}
           </nav>
-          <Link href="/audit" className="btn-primary" style={{ textDecoration: 'none', padding: '10px 20px' }}>
-            Start Audit →
+          <Link href="/audit" style={{
+            background: '#ED232A',
+            color: 'white',
+            textDecoration: 'none',
+            padding: '8px 24px',
+            borderRadius: '4px',
+            fontWeight: 700,
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            LOGIN <ChevronRight size={16} strokeWidth={3} />
           </Link>
         </div>
       </nav>
 
-      {/* ===== HERO ===== */}
+      <div style={{ background: 'white', padding: '12px 40px', borderBottom: '1px solid #E2E8F0', display: 'flex', gap: '32px', fontSize: '13px', color: '#475569', fontWeight: 500 }}>
+        <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Discover Products <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} /></span>
+        <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Need Help <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} /></span>
+        <span style={{ cursor: 'pointer' }}>Better Claim Choices®</span>
+      </div>
+
+      {/* ===== HERO (Screenshot 3 Style) ===== */}
       <section style={{
-        background: 'linear-gradient(135deg, #F8FAFC 0%, #E6EEF8 50%, #F8FAFC 100%)',
-        padding: '80px 40px 60px',
+        position: 'relative',
+        height: '550px',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 80px',
+        overflow: 'hidden',
+      }}>
+        {/* Background Image */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'url("https://images.unsplash.com/photo-1573164574572-cb89e39749b4?q=80&w=1600&auto=format&fit=crop") center/cover',
+          zIndex: 0,
+        }} />
+        {/* Gradient Overlay for text readability */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(0,76,143,0.9) 0%, rgba(0,76,143,0.4) 50%, transparent 100%)',
+          zIndex: 1,
+        }} />
+
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ position: 'relative', zIndex: 2, maxWidth: '600px' }}
+        >
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '56px',
+            fontWeight: 800,
+            color: 'white',
+            lineHeight: 1.1,
+            marginBottom: '16px',
+          }}>
+            Experience Claim Settlement Differently
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            color: 'rgba(255,255,255,0.9)',
+            marginBottom: '32px',
+            fontWeight: 500,
+            lineHeight: 1.5,
+          }}>
+            Introducing the New DeathLedger AI Auditor.<br />
+            Detect name mismatches in seconds.
+          </p>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <Link href="/audit" style={{
+              background: 'white',
+              color: '#004C8F',
+              textDecoration: 'none',
+              padding: '12px 24px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              fontSize: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              Start Free Audit <ChevronRight size={16} strokeWidth={2.5} color="#ED232A" />
+            </Link>
+            <Link href="#demo" style={{
+              background: 'white',
+              color: '#004C8F',
+              textDecoration: 'none',
+              padding: '12px 24px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              fontSize: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              Watch Demo <ChevronRight size={16} strokeWidth={2.5} color="#ED232A" />
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Floating Search Bar (Ask EVA style) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            width: '80%',
+            maxWidth: '800px',
+            borderRadius: '12px',
+            padding: '16px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            zIndex: 3,
+          }}
+        >
+          <Bot size={28} color="#004C8F" />
+          <input
+            type="text"
+            placeholder="What are you looking for today? (e.g., Succession Certificate)"
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              fontSize: '16px',
+              color: '#1E293B',
+              fontWeight: 500,
+            }}
+          />
+          <Search size={24} color="#94A3B8" />
+        </motion.div>
+      </section>
+
+      {/* ===== BANKING SOLUTIONS / FEATURES (Screenshot 1 Style) ===== */}
+      <section style={{ padding: '80px 40px', background: 'white', textAlign: 'center' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#1E293B', marginBottom: '24px', fontWeight: 700 }}>
+          Banking Solutions tailor-made for you
+        </h2>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', borderBottom: '2px solid #E2E8F0', marginBottom: '40px', paddingBottom: '16px' }}>
+          {['Trending', 'Accounts', 'Deposits', 'Cards', 'Loans', 'Insurance'].map((tab, i) => (
+            <span key={tab} style={{
+              color: i === 0 ? '#004C8F' : '#64748B',
+              fontWeight: i === 0 ? 700 : 500,
+              fontSize: '16px',
+              cursor: 'pointer',
+              position: 'relative',
+            }}>
+              {tab}
+              {i === 0 && <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '3px', background: '#004C8F' }} />}
+            </span>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          {[
+            { title: 'Smart Name Matching', desc: 'Detects "Rajesh Kumar" vs "R. Kumar" automatically.', icon: <Search size={32} color="#004C8F" /> },
+            { title: 'RBI 2026 Compliant', desc: 'Cites exact circular RBI/2025-26/95 in every letter.', icon: <Scale size={32} color="#004C8F" /> },
+            { title: 'One-Click Packet', desc: 'Download a court-ready PDF with checklist & report.', icon: <FileText size={32} color="#004C8F" /> },
+            { title: 'Hindi Interface', desc: 'Full UI switch for Tier 2 & 3 families.', icon: <Globe size={32} color="#004C8F" /> },
+            { title: 'Institution-Specific', desc: 'Separate checklists for SBI, LIC, HDFC, and ICICI.', icon: <Landmark size={32} color="#004C8F" /> },
+            { title: '15-Day SLA Tracker', desc: 'Know exactly when the bank is legally obligated to pay.', icon: <Clock size={32} color="#004C8F" /> },
+          ].map((feat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              style={{
+                background: '#F8FAFC',
+                borderRadius: '12px',
+                padding: '32px 24px',
+                textAlign: 'center',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                border: '1px solid #E2E8F0',
+              }}
+            >
+              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>{feat.icon}</div>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', marginBottom: '8px' }}>{feat.title}</h3>
+              <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.6 }}>{feat.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== DIGITAL SERVICES (Screenshot 2 Style - Bright Yellow Background) ===== */}
+      <section style={{
+        background: '#FFC107', // Bright Yellow
+        padding: '80px 40px',
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Background decoration */}
+        {/* Background Graphic/Image */}
         <div style={{
           position: 'absolute',
-          top: '-100px',
-          right: '-100px',
+          right: '-5%',
+          top: '50%',
+          transform: 'translateY(-50%)',
           width: '500px',
           height: '500px',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(10,61,145,0.06) 0%, transparent 70%)',
-          pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 0,
+        }}>
+          <img src="https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=600&auto=format&fit=crop" alt="Headphones" style={{ width: '300px', borderRadius: '50%', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }} />
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', color: '#1E293B', marginBottom: '16px', fontWeight: 800, maxWidth: '500px', lineHeight: 1.1 }}>
+            Explore All DeathLedger Digital Services
+          </h2>
+
+          <div style={{ display: 'flex', alignItems: 'center', background: 'white', borderRadius: '8px', padding: '12px 24px', maxWidth: '400px', marginBottom: '48px' }}>
+            <input type="text" placeholder="Tell us about your issue" style={{ border: 'none', outline: 'none', width: '100%', fontSize: '15px' }} />
+            <ArrowRight size={20} color="#94A3B8" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+            {[
+              { title: 'Top Online Services', links: ['Update PAN', 'Form 121 (15 G/H)', 'Debit Card Hot-listing'] },
+              { title: 'Account Services', links: ['Address Change', 'Nomination', 'Update Enable/Disable AePS'] },
+              { title: 'Deposits Services', links: ['FD RD Liquidation', 'FD RD Advice Reissuance', 'Break Deposit'] },
+              { title: 'Card Services', links: ['Address Change', 'Email ID Updation', 'Mobile No Updation'] },
+            ].map((col, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                }}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', marginBottom: '16px' }}>{col.title}</h3>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {col.links.map(link => (
+                    <li key={link} style={{ fontSize: '14px', color: '#475569', fontWeight: 500, cursor: 'pointer' }}>{link}</li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PARIVARTAN STYLE / IMPACT BANNER (Screenshot 4 Style) ===== */}
+      <section style={{
+        position: 'relative',
+        padding: '100px 40px',
+        display: 'flex',
+        alignItems: 'center',
+        background: '#E6EEF8',
+        overflow: 'hidden',
+      }}>
+        {/* Background Image on Left */}
+        <div style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '50%',
+          background: 'url("https://images.unsplash.com/photo-1604881990409-b9f246db39da?q=80&w=1200&auto=format&fit=crop") center/cover',
+          zIndex: 0,
+        }} />
+        {/* Gradient Blend */}
+        <div style={{
+          position: 'absolute',
+          left: '40%',
+          top: 0,
+          bottom: 0,
+          width: '20%',
+          background: 'linear-gradient(90deg, transparent, #E6EEF8)',
+          zIndex: 1,
         }} />
 
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
-          {/* Left */}
-          <div>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'var(--color-primary-light)',
-              color: 'var(--color-primary)',
-              borderRadius: '9999px',
-              padding: '6px 14px',
-              fontSize: '12px',
-              fontWeight: 600,
-              marginBottom: '24px',
-              border: '1px solid rgba(10,61,145,0.2)',
-            }}>
-              ⚖️ Citing RBI Circular RBI/2025-26/95
+        <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', justifyContent: 'flex-end', position: 'relative', zIndex: 2 }}>
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            style={{ width: '50%', paddingLeft: '40px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ background: 'white', padding: '4px', borderRadius: '4px' }}><Shield size={20} color="#ED232A" /></div>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#004C8F', letterSpacing: '0.5px' }}>DEATHLEDGER PARIVARTAN</span>
             </div>
 
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '52px',
-              fontWeight: 700,
-              color: 'var(--color-text-primary)',
-              lineHeight: 1.15,
-              letterSpacing: '-0.03em',
-              marginBottom: '20px',
-            }}>
-              Settle Death Claims{' '}
-              <span style={{ color: 'var(--color-primary)' }}>Without a Lawyer</span>
-            </h1>
-
-            <p style={{
-              fontSize: '17px',
-              color: 'var(--color-text-secondary)',
-              lineHeight: 1.7,
-              marginBottom: '36px',
-              maxWidth: '480px',
-            }}>
-              Automatically detect name mismatches, generate claim letters citing RBI 2025-26/95,
-              and walk into any bank fully prepared.
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', color: '#1E293B', marginBottom: '20px', fontWeight: 800, lineHeight: 1.1 }}>
+              Building a better India –<br />one step at a time
+            </h2>
+            <p style={{ fontSize: '16px', color: '#475569', marginBottom: '40px', lineHeight: 1.6 }}>
+              From legal empowerment to financial recovery and everything in between – DeathLedger is transforming India by ensuring rightful heirs get their dues.
             </p>
 
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-              <Link href="/audit" className="btn-primary" style={{
-                textDecoration: 'none',
-                padding: '14px 28px',
-                fontSize: '16px',
-                boxShadow: '0 4px 20px rgba(10,61,145,0.25)',
-              }}>
-                Start Free Audit
-              </Link>
-              <Link href="/audit" className="btn-ghost" style={{
-                textDecoration: 'none',
-                padding: '14px 28px',
-                fontSize: '16px',
-              }}>
-                ▶ Watch Demo
-              </Link>
-            </div>
-
-            <div style={{ display: 'flex', gap: '28px', marginTop: '36px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
               {[
-                { value: '4 sec', label: 'Audit time' },
-                { value: '₹0', label: 'Legal fees' },
-                { value: '15 day', label: 'RBI SLA' },
-              ].map((s) => (
-                <div key={s.label}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--color-primary)' }}>
-                    {s.value}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    {s.label}
-                  </div>
+                { number: '12+ lakh', label: 'Households impacted' },
+                { number: '10+ crore', label: 'Rupees Recovered' },
+                { number: '20+ lakh', label: 'Queries Solved' },
+                { number: '9K+', label: 'Villages Covered' },
+              ].map((stat, i) => (
+                <div key={i} style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#004C8F', marginBottom: '4px' }}>{stat.number}</div>
+                  <div style={{ fontSize: '14px', color: '#64748B', fontWeight: 500 }}>{stat.label}</div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Right — Mockup Dashboard Card */}
-          <div style={{ position: 'relative' }}>
-            <div className="card-elevated" style={{ padding: '24px', borderRadius: 'var(--radius-lg)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '20px' }}>🔍</span>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700 }}>Audit Results</div>
-                  <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Sunita Devi • SBI • 2 May 2026</div>
-                </div>
-                <div style={{
-                  marginLeft: 'auto',
-                  background: 'var(--color-critical-bg)',
-                  color: 'var(--color-critical)',
-                  borderRadius: '6px',
-                  padding: '4px 10px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  border: '1px solid var(--color-critical)',
-                }}>CRITICAL</div>
-              </div>
-
-              {/* Mini stat boxes */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
-                {[
-                  { n: 1, label: 'OK', color: 'var(--color-ok)', bg: 'var(--color-ok-bg)' },
-                  { n: 0, label: 'MINOR', color: 'var(--color-minor)', bg: 'var(--color-minor-bg)' },
-                  { n: 3, label: 'CRITICAL', color: 'var(--color-critical)', bg: 'var(--color-critical-bg)' },
-                ].map((s) => (
-                  <div key={s.label} style={{ background: s.bg, borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: s.color }}>{s.n}</div>
-                    <div style={{ fontSize: '10px', fontWeight: 700, color: s.color, letterSpacing: '0.06em' }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mini contradiction table */}
-              {[
-                { docA: 'Death Cert', docB: 'Aadhaar', score: 100, severity: 'OK' as const },
-                { docA: 'Death Cert', docB: 'Bank Pass.', score: 62, severity: 'CRITICAL' as const },
-                { docA: 'Death Cert', docB: 'PAN Card', score: 78, severity: 'CRITICAL' as const },
-              ].map((row, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '9px 0',
-                  borderBottom: i < 2 ? '1px solid var(--color-border)' : 'none',
-                }}>
-                  <div style={{ flex: 1, fontSize: '12px' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{row.docA}</span>
-                    <span style={{ color: 'var(--color-text-muted)', margin: '0 4px' }}>→</span>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>{row.docB}</span>
-                  </div>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    borderRadius: '9999px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    background: row.severity === 'OK' ? 'var(--color-ok-bg)' : 'var(--color-critical-bg)',
-                    color: row.severity === 'OK' ? 'var(--color-ok)' : 'var(--color-critical)',
-                  }}>
-                    {row.score}% {row.severity === 'OK' ? '✅' : '🔴'} {row.severity}
-                  </span>
-                </div>
-              ))}
-
-              {/* Action buttons preview */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                <div style={{
-                  flex: 1,
-                  background: 'var(--color-primary)',
-                  color: 'white',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}>📄 Download Packet</div>
-                <div style={{
-                  flex: 1,
-                  background: '#25D366',
-                  color: 'white',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}>📱 WhatsApp</div>
-              </div>
-            </div>
-
-            {/* Floating badge */}
-            <div style={{
-              position: 'absolute',
-              top: '-14px',
-              right: '-14px',
-              background: 'var(--color-accent)',
+            <Link href="/audit" style={{
+              background: '#004C8F',
               color: 'white',
-              borderRadius: '9999px',
-              padding: '8px 14px',
-              fontSize: '12px',
-              fontWeight: 700,
-              boxShadow: '0 4px 12px rgba(165,0,52,0.3)',
-            }}>
-              ⚡ 4 seconds
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== PAIN POINT BANNER ===== */}
-      <section style={{
-        background: 'linear-gradient(90deg, var(--color-primary) 0%, #1550B0 100%)',
-        padding: '28px 40px',
-        textAlign: 'center',
-      }}>
-        <p style={{
-          color: 'rgba(255,255,255,0.95)',
-          fontSize: '16px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          lineHeight: 1.7,
-        }}>
-          <strong style={{ color: 'white' }}>Sunita Devi, 58, Varanasi</strong> visited her SBI branch{' '}
-          <strong style={{ color: '#FCD34D' }}>11 times</strong> and spent{' '}
-          <strong style={{ color: '#FCD34D' }}>₹43,000</strong> — because 3 documents spelled her husband&apos;s name differently.{' '}
-          <strong style={{ color: 'white' }}>DeathLedger catches this in 4 seconds.</strong>
-        </p>
-      </section>
-
-      {/* ===== FEATURES GRID ===== */}
-      <section style={{ padding: '80px 40px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label-caps" style={{ marginBottom: '12px' }}>Why DeathLedger</div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', color: 'var(--color-text-primary)', marginBottom: '12px' }}>
-            Everything you need in one place
-          </h2>
-          <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto' }}>
-            No lawyers. No consultants. Just AI that knows Indian banking law.
-          </p>
-        </div>
-
-        <FeaturesGrid />
-      </section>
-
-      {/* ===== HOW IT WORKS ===== */}
-      <section id="how-it-works" style={{ background: 'var(--color-primary-light)', padding: '80px 40px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div className="label-caps" style={{ marginBottom: '12px' }}>The Process</div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', color: 'var(--color-text-primary)' }}>
-              Three steps to claim settlement
-            </h2>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr auto 1fr', alignItems: 'center', gap: '0' }}>
-            {[
-              {
-                step: '01',
-                icon: '📁',
-                title: 'Upload Documents',
-                desc: 'Drag and drop your Death Certificate, Aadhaar, PAN, Passbook and any other documents.',
-              },
-              null, // arrow
-              {
-                step: '02',
-                icon: '🤖',
-                title: 'AI Audit',
-                desc: 'Our engine detects name mismatches, checks for missing documents, and flags regulatory issues.',
-              },
-              null, // arrow
-              {
-                step: '03',
-                icon: '⬇️',
-                title: 'Download Packet',
-                desc: 'Get a complete claim packet: covering letter, contradiction report, affidavit — ready to submit.',
-              },
-            ].map((item, i) =>
-              item === null ? (
-                <div key={i} style={{ textAlign: 'center', fontSize: '24px', color: 'var(--color-primary)', opacity: 0.5 }}>→</div>
-              ) : (
-                <div key={i} style={{
-                  background: 'white',
-                  borderRadius: 'var(--radius)',
-                  padding: '28px 24px',
-                  textAlign: 'center',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-card)',
-                  position: 'relative',
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: '-12px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'var(--color-primary)',
-                    color: 'white',
-                    borderRadius: '9999px',
-                    padding: '3px 12px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                  }}>
-                    STEP {item.step}
-                  </div>
-                  <div style={{ fontSize: '40px', marginBottom: '14px', marginTop: '8px' }}>{item.icon}</div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', marginBottom: '8px' }}>{item.title}</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>{item.desc}</p>
-                </div>
-              )
-            )}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '48px' }}>
-            <Link href="/audit" className="btn-primary" style={{
               textDecoration: 'none',
-              padding: '16px 40px',
+              padding: '14px 32px',
+              borderRadius: '6px',
+              fontWeight: 700,
               fontSize: '16px',
-              boxShadow: '0 4px 20px rgba(10,61,145,0.25)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              Start Your Audit — It&apos;s Free
+              Explore <ChevronRight size={18} strokeWidth={3} />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== INSTITUTIONS ===== */}
-      <section style={{ padding: '60px 40px', maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-        <div className="label-caps" style={{ marginBottom: '24px' }}>Supported Institutions</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          {[
-            { name: 'SBI', fullName: 'State Bank of India', color: '#0A3D91', bg: '#E6EEF8' },
-            { name: 'LIC', fullName: 'Life Insurance Corp.', color: '#8B0000', bg: '#FFF0F0' },
-            { name: 'HDFC', fullName: 'HDFC Bank', color: '#A50034', bg: '#FFF0F3' },
-            { name: 'ICICI', fullName: 'ICICI Bank', color: '#F47920', bg: '#FFF8F0' },
-          ].map((inst) => (
-            <div
-              key={inst.name}
-              style={{
-                background: inst.bg,
-                border: `2px solid ${inst.color}30`,
-                borderRadius: 'var(--radius)',
-                padding: '20px 28px',
-                minWidth: '160px',
-              }}
-            >
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: inst.color }}>
-                {inst.name}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px' }}>{inst.fullName}</div>
-            </div>
-          ))}
+          </motion.div>
         </div>
       </section>
 
       {/* ===== FOOTER ===== */}
       <footer style={{
-        background: 'var(--color-text-primary)',
+        background: '#003366',
         padding: '40px',
         textAlign: 'center',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '12px' }}>
-          <span style={{ fontSize: '20px' }}>🛡️</span>
+          <Shield size={24} color="white" />
           <span style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '20px',
+            fontSize: '24px',
             color: 'white',
+            fontWeight: 800,
           }}>
             DeathLedger
           </span>
@@ -443,10 +429,7 @@ export default function HomePage() {
         <p style={{ color: '#64748B', fontSize: '12px' }}>
           Cites RBI/2025-26/95 • Banking Regulation Act 1949 • IRDAI Guidelines 2024
         </p>
-        <p style={{ color: '#475569', fontSize: '11px', marginTop: '16px' }}>
-          DeathLedger is an AI-assisted tool. Always verify legal requirements with a qualified professional.
-        </p>
       </footer>
-    </>
+    </div>
   );
 }

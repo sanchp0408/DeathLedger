@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
+import { motion } from 'framer-motion';
+import { Clipboard, AlertTriangle } from 'lucide-react';
 
 interface Props {
   submissionDate: Date | null;
@@ -113,28 +115,27 @@ export default function SLACountdown({ submissionDate, onDateChange, totalDays =
 
           {/* Progress Bar */}
           <div className="progress-track" style={{ marginBottom: '16px' }}>
-            <div
+            <motion.div
               className="progress-fill"
-              style={{
-                width: `${pct}%`,
-                background: progressColor,
-                transition: 'width 1.2s ease',
-              }}
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              style={{ background: progressColor }}
             />
           </div>
 
           {/* Copy Legal Text */}
           <button
             className="btn-ghost"
-            style={{ width: '100%', justifyContent: 'center', fontSize: '13px' }}
+            style={{ width: '100%', justifyContent: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
             onClick={copyLegal}
           >
-            📋 Cite this to the bank branch manager
+            <Clipboard size={16} strokeWidth={1.5} /> Cite this to the bank branch manager
           </button>
 
           {status === 'breached' && (
-            <div className="banner-critical" style={{ marginTop: '12px', fontSize: '12px', fontWeight: 600 }}>
-              🚨 Bank must settle immediately or begin paying interest per RBI/2025-26/95 Section 7(b)
+            <div className="banner-critical" style={{ marginTop: '12px', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertTriangle size={16} strokeWidth={1.5} /> Bank must settle immediately or begin paying interest per RBI/2025-26/95 Section 7(b)
             </div>
           )}
         </>

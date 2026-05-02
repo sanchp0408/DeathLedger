@@ -5,6 +5,8 @@ import { useAuditStore } from '@/store/auditStore';
 import { Comparison } from '@/lib/demoData';
 import ConfidencePill from './ConfidencePill';
 import { useTranslations } from '@/hooks/useTranslations';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 
 interface Props {
   comparisons: Comparison[];
@@ -58,10 +60,15 @@ export default function ContradictionTable({ comparisons }: Props) {
               <th style={{ padding: '10px 14px', background: 'var(--color-bg)', width: '36px', borderBottom: '1px solid var(--color-border)' }}></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody style={{ position: 'relative' }}>
+            <AnimatePresence>
             {comparisons.map((c, i) => (
               <React.Fragment key={i}>
-                <tr
+                <motion.tr
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={c.severity === 'CRITICAL' ? 'animate-pulse-ring' : ''}
                   style={{
                     background:
                       c.severity === 'CRITICAL'
@@ -103,12 +110,19 @@ export default function ContradictionTable({ comparisons }: Props) {
                       fontSize: '10px',
                       transition: 'transform 0.2s',
                       transform: expanded === i ? 'rotate(180deg)' : 'rotate(0deg)',
-                      color: 'var(--color-text-muted)',
-                    }}>▼</span>
+                    }}>
+                      <ChevronDown size={14} />
+                    </span>
                   </td>
-                </tr>
+                </motion.tr>
+                <AnimatePresence>
                 {expanded === i && (
-                  <tr key={`detail-${i}`}>
+                  <motion.tr 
+                    key={`detail-${i}`}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
                     <td colSpan={5} style={{ padding: '0', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{
                         background: 'var(--color-bg)',
@@ -138,10 +152,12 @@ export default function ContradictionTable({ comparisons }: Props) {
                         )}
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 )}
+                </AnimatePresence>
               </React.Fragment>
             ))}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>
