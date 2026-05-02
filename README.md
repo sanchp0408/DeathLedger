@@ -1,216 +1,121 @@
-# ⚖️ DeathLedger — AI-Powered Deceased Claim Auditor  
+# DeathLedger — AI-Powered Deceased Claim Auditor
 
-<p align="center">
-  <b>From loss to claim — in under 60 seconds.</b><br/>
-  Built for Bharat 🇮🇳
-</p>
+DeathLedger is a tool designed to simplify the document verification process after a person’s death in India.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Built%20At-Hackathon-blue?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/AI-Powered-purple?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Impact-High-red?style=for-the-badge"/>
-</p>
+Instead of making multiple trips to banks and insurance offices, families can upload their documents once and get a complete, submission-ready claim packet in under a minute.
 
 ---
 
-## 🩸 The Problem Nobody Talks About
+## The Problem
 
-When someone dies, families don’t just grieve — they enter a system they don’t understand.
+After a death, families are expected to quickly handle financial and legal formalities. In reality, this process is confusing and error-prone.
 
-### ⚠️ Hidden Pain Points
+Common issues:
+- Different institutions require different sets of documents  
+- Small name mismatches lead to rejection  
+- No clear guidance on regulatory rules  
+- Multiple visits are needed to fix mistakes  
 
-| Problem | Real Impact |
-|--------|------------|
-| 📄 12+ documents required | Families don’t know what to bring |
-| ✍️ Name mismatches | Instant rejection |
-| 🏛️ Different rules per bank | Multiple visits |
-| ⏰ 15-day SLA | Deadlines missed |
-| 🔇 No legal guidance | Expensive lawyers |
-
-> ⚠️ 84% of delayed claims involve document issues — most detectable instantly.
+In many cases, delays happen because of simple document inconsistencies that could be detected early.
 
 ---
 
-## 💡 The Solution: DeathLedger
+## The Solution
 
-DeathLedger is an **AI-powered claim auditor** that prepares families *before* they step into a bank.
+DeathLedger audits documents before submission.
 
-<p align="center">
-  ⚡ What takes 3 weeks → now takes 60 seconds
-</p>
+It:
+- Extracts names from uploaded files  
+- Compares them across documents  
+- Flags mismatches with severity levels  
+- Checks required documents based on institution  
+- Generates a claim letter and a final PDF packet  
 
----
-
-## ✨ Core Features
-
-### 🔍 Smart Document Intelligence
-- OCR (PyPDF2 + Tesseract + Vision fallback)
-- AI name extraction (spaCy)
-- Supports Aadhaar, PAN, Death Cert, Passbook, Policies
+The goal is simple: **help users walk into a bank fully prepared the first time.**
 
 ---
 
-### 🧮 AI Contradiction Engine
+## Key Features
 
-Detects mismatches *before banks do*:
+### Document Processing
+- OCR for PDFs and images  
+- Supports Aadhaar, PAN, Death Certificate, Passbook, Insurance Policy  
 
-**Output:**
-- ✅ OK  
-- ⚠️ MINOR (affidavit suggested)  
-- ❌ CRITICAL (legal correction needed)
+### Name Verification
+- Compares names using multiple matching techniques  
+- Classifies issues as OK, Minor, or Critical  
+- Suggests next steps (e.g., affidavit)
 
----
+### Institution Rules
+- Supports SBI, LIC, HDFC Bank, ICICI Bank  
+- Checks required documents  
+- Applies relevant RBI and IRDAI guidelines  
 
-### 🏛️ Regulatory Intelligence
+### Claim Letter Generation
+- Generates a structured claim letter  
+- Includes appropriate regulatory references  
 
-- Supports SBI, LIC, HDFC, ICICI  
-- Applies RBI & IRDAI rules automatically  
+### PDF Output
+- Checklist of required documents  
+- Mismatch report  
+- Claim letter  
+- Ready for submission  
 
-Detects:
-- 🟢 Simplified claims (< ₹15L)  
-- 🛡️ Nominee protection (Section 45ZA)  
-- ⏱️ 15-day SLA tracking  
-
----
-
-### 🤖 AI Claim Letter Generator
-
-- Generates legally correct claim letters  
-- Cites RBI / IRDAI circulars  
-- Ready to print & submit  
-
-👉 Equivalent to a ₹10,000 legal consultation
-
----
-
-### 📦 One-Click Submission Packet
-
-**DeathLedger_Claim_Packet.pdf**
-- ✅ Checklist  
-- ⚠️ Mismatch report  
-- 📄 Claim letter  
-- 📞 Escalation contacts  
+### Accessibility
+- Text-to-speech (English and Hindi)  
+- Shareable summary (WhatsApp-friendly)  
+- Demo mode for testing  
 
 ---
 
-### ♿ Accessibility for Bharat
-
-- 🔊 Text-to-Speech (EN + HI)  
-- 📲 WhatsApp summary  
-- 📱 Mobile-first UI  
-- 🎯 Demo mode  
-
----
-
-## 🧠 Why DeathLedger Stands Out
-
-| Others | DeathLedger |
-|-------|-------------|
-| Store documents | ✅ Understands them |
-| No legal logic | ✅ Applies RBI/IRDAI rules |
-| Reactive | ✅ Prevents rejection |
-
----
-
-## 🎯 Impact
-
-| Metric | Before | After |
-|-------|--------|-------|
-| ⏰ Time | 2–3 weeks | < 60 sec |
-| 🏦 Visits | 4–6 | 1 |
-| ❌ Rejections | ~40% | < 5% |
-| 💰 Cost | ₹5K–₹15K | ₹0 |
-
----
-
-## ⚙️ How It Works
+## How It Works
 
 1. Upload documents  
-2. AI extracts names  
-3. Detects mismatches  
-4. Checks required docs  
-5. Applies legal rules  
-6. Generates claim letter  
-7. Downloads PDF  
+2. System extracts and compares names  
+3. Missing documents are identified  
+4. Legal checks are applied  
+5. A final PDF packet is generated  
 
 ---
 
-## 🏗️ Architecture
-Frontend (Next.js)
-↓
-FastAPI Backend
-↓
-OCR + NER + Rules Engine
-↓
-Contradiction Engine
-↓
-Claude API
-↓
-PDF Generator
+## Tech Stack
 
+**Backend**
+- FastAPI  
+- Tesseract OCR  
+- spaCy  
+- RapidFuzz  
+- ReportLab  
 
----
-
-## 🔐 Privacy First
-
-- No document storage  
-- In-memory processing  
-- Aadhaar/PAN masked  
-- DPDP Act compliant  
+**Frontend**
+- Next.js  
+- TypeScript  
+- Zustand  
 
 ---
 
-## 🚀 Demo
+## Impact
 
-🎬 *Add 30–60 sec demo video here*
-
----
-
-## 🎤 Winning Demo Script (Use This!)
-
-**Intro (10 sec):**  
-“After someone dies in India, families spend weeks just figuring out documents. One mismatch — and claims get rejected.”
-
-**Problem (10 sec):**  
-“Most delays happen due to document errors that could be detected instantly.”
-
-**Solution (15 sec):**  
-“DeathLedger audits all documents, detects mismatches, applies RBI rules, and generates a submission-ready packet — in under 60 seconds.”
-
-**Live Demo (20 sec):**
-- Upload docs  
-- Show mismatch detection  
-- Show PDF generation  
-
-**Closing (5 sec):**  
-“We’re not just saving time — we’re reducing stress during grief.”
+- Reduces repeated bank visits  
+- Helps avoid claim rejection due to minor errors  
+- Saves time during a difficult situation  
 
 ---
 
-## 🗺️ Future Scope
+## Demo
 
-- 🌐 Multi-language OCR  
-- 📡 Bank API integration  
-- 📱 Offline mobile app  
-- 🏥 Hospital integration  
+(Add demo video or screenshots here)
 
 ---
 
-## 👥 Team
+## Team
 
-- You — AI + Backend  
+- You — Backend, AI logic  
 - Teammate — Frontend  
 - Teammate — Research  
 
 ---
 
-## 🏆 Why This Matters
-
-> DeathLedger helps families access money faster, avoid rejection, and navigate bureaucracy during their hardest time.
-
----
-
-## 📄 License
+## License
 
 MIT License
