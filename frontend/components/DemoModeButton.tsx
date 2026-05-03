@@ -57,7 +57,7 @@ export default function DemoModeButton() {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          background: '#F57C00',
+          background: 'linear-gradient(135deg, #FF8F00 0%, #FF5722 100%)',
           color: 'white',
           border: 'none',
           borderRadius: '9999px',
@@ -66,9 +66,9 @@ export default function DemoModeButton() {
           fontWeight: 700,
           fontFamily: 'var(--font-body)',
           cursor: 'pointer',
-          boxShadow: '0 4px 20px rgba(245, 124, 0, 0.4)',
-          transform: hovered ? 'scale(1.05)' : 'scale(1)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          boxShadow: '0 8px 32px rgba(255, 87, 34, 0.5)',
+          transform: hovered ? 'scale(1.05) translateY(-2px)' : 'scale(1)',
+          transition: 'all 0.3s ease',
         }}
         title="Load demo with Rajesh Kumar scenario"
       >

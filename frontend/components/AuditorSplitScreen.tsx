@@ -15,7 +15,7 @@ import AffidavitModal from './AffidavitModal';
 import WhatsAppShare from './WhatsAppShare';
 import { motion } from 'framer-motion';
 import { maskPrivacyData } from '@/lib/formatters';
-import { FileText, ShieldAlert, CheckCircle, Search, Download, Share2, FileWarning, Clock, UserCheck, Phone, Scale, AlertTriangle, FolderUp, Image as ImageIcon } from 'lucide-react';
+import { FileText, ShieldAlert, CheckCircle, Search, Download, Share2, FileWarning, Clock, UserCheck, Phone, Scale, AlertTriangle, FolderUp, Image as ImageIcon, Landmark, User, IndianRupee } from 'lucide-react';
 import TextToSpeech from './TextToSpeech';
 
 interface UploadedFile {
@@ -388,12 +388,15 @@ export default function AuditorSplitScreen() {
             display: 'flex',
             flexDirection: 'column',
             gap: 'var(--section-gap, 32px)',
-            background: 'var(--color-bg)',
+            background: 'var(--color-primary-light)',
           }}
         >
           {/* Institution Selector */}
           <div>
-            <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
+            <label className="label-caps" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <span style={{ background: 'rgba(10, 61, 145, 0.05)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                <Landmark size={14} color="var(--color-primary)" />
+              </span>
               {t.selectInstitution}
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: '12px' }}>
@@ -404,14 +407,16 @@ export default function AuditorSplitScreen() {
                   style={{
                     padding: '10px 16px',
                     borderRadius: 'var(--radius-sm)',
-                    border: `2px solid ${institution === key ? INSTITUTION_COLORS[key] : 'var(--color-border)'}`,
-                    background: institution === key ? INSTITUTION_COLORS[key] : 'white',
-                    color: institution === key ? 'white' : 'var(--color-text-secondary)',
+                    border: 'none',
+                    borderBottom: institution === key ? `3px solid ${INSTITUTION_COLORS[key]}` : '3px solid transparent',
+                    background: institution === key ? `linear-gradient(to bottom, white, ${INSTITUTION_COLORS[key]}15)` : 'white',
+                    color: institution === key ? INSTITUTION_COLORS[key] : 'var(--color-text-secondary)',
                     fontWeight: 600,
                     fontSize: '13px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'all 0.3s ease',
                     textAlign: 'center',
+                    boxShadow: 'var(--shadow-card)',
                   }}
                 >
                   {key}
@@ -419,7 +424,7 @@ export default function AuditorSplitScreen() {
               ))}
             </div>
             {institution && (
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="badge-tint" style={{ marginTop: '12px', fontSize: '11px', gap: '6px' }}>
                 {INSTITUTION_RULES[institution].name} • SLA: {INSTITUTION_RULES[institution].sladays} days • <Phone size={12} /> {INSTITUTION_RULES[institution].contact}
               </div>
             )}
@@ -429,7 +434,10 @@ export default function AuditorSplitScreen() {
           <div>
             <div className="card" style={{ padding: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: nomineeExists ? '16px' : '0' }}>
-                <label style={{ fontWeight: 600, fontSize: '14px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
+                <label style={{ fontWeight: 600, fontSize: '14px', cursor: 'pointer', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ background: 'rgba(10, 61, 145, 0.05)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                    <User size={16} color="var(--color-primary)" />
+                  </span>
                   {t.nomineeExists}
                 </label>
                 <button
@@ -453,7 +461,10 @@ export default function AuditorSplitScreen() {
           {/* Claim Amount */}
           <div>
             <div className="card" style={{ padding: '20px', background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-              <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
+              <label className="label-caps" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ background: 'rgba(10, 61, 145, 0.05)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                  <IndianRupee size={14} color="var(--color-primary)" />
+                </span>
                 {t.claimAmount}
               </label>
               <div style={{ position: 'relative' }}>
@@ -484,7 +495,10 @@ export default function AuditorSplitScreen() {
 
           {/* Upload Zone */}
           <div>
-            <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
+            <label className="label-caps" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <span style={{ background: 'rgba(10, 61, 145, 0.05)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                <FileText size={14} color="var(--color-primary)" />
+              </span>
               {t.uploadLabel}
             </label>
             
