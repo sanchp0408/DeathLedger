@@ -95,6 +95,7 @@ Goal: **help users walk into a bank fully prepared the first time.**
 
 **Deployment**
 - Render
+- Vercel
 
 ---
 
