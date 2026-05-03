@@ -152,7 +152,7 @@ export default function HomePage() {
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(90deg, rgba(0,76,143,0.9) 0%, rgba(0,76,143,0.4) 50%, transparent 100%)',
+          background: 'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
           zIndex: 1,
         }} />
 
@@ -182,28 +182,31 @@ export default function HomePage() {
             {T.hero_p}
           </p>
           <div style={{ display: 'flex', gap: '16px' }}>
-            <Link href="/audit" style={{
-              background: 'white',
-              color: '#004C8F',
-              textDecoration: 'none',
-              padding: '15px 32px',
-              borderRadius: '8px',
-              fontWeight: 800,
-              fontSize: '17px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
-            }}>
-              {T.hero_btn1} <ChevronRight size={18} strokeWidth={2.5} color="#ED232A" />
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link href="/audit" style={{
+                background: 'white',
+                color: '#004C8F',
+                textDecoration: 'none',
+                padding: '16px 36px',
+                borderRadius: '16px',
+                fontWeight: 800,
+                fontSize: '17px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                boxShadow: '0 8px 32px rgba(0, 76, 143, 0.4)',
+                transition: 'all 0.3s ease'
+              }}>
+                {T.hero_btn1} <ChevronRight size={18} strokeWidth={2.5} color="#ED232A" />
+              </Link>
+            </motion.div>
           </div>
         </motion.div>
 
       </section>
 
       {/* ===== BANKING SOLUTIONS / FEATURES (Screenshot 1 Style) ===== */}
-      <section style={{ padding: '80px 40px', background: 'white', textAlign: 'center' }}>
+      <section style={{ padding: '120px 40px', background: 'white', textAlign: 'center' }}>
         <div style={{ marginBottom: '12px', fontSize: '13px', fontWeight: 700, color: '#004C8F', letterSpacing: '1.5px', textTransform: 'uppercase' }}>WHY DEATHLEDGER</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#1E293B', marginBottom: '8px', fontWeight: 700 }}>
           {T.feat_h2}
@@ -225,16 +228,22 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -6, boxShadow: '0 12px 32px rgba(0, 76, 143, 0.08)' }}
               style={{
                 background: '#F8FAFC',
-                borderRadius: '12px',
-                padding: '32px 24px',
+                borderRadius: '16px',
+                padding: '40px 32px',
                 textAlign: 'center',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
                 border: '1px solid #E2E8F0',
+                transition: 'all 0.3s ease',
               }}
             >
-              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>{feat.icon}</div>
+              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ background: 'rgba(0, 76, 143, 0.05)', padding: '16px', borderRadius: '50%' }}>
+                  {feat.icon}
+                </div>
+              </div>
               <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', marginBottom: '8px' }}>{feat.title}</h3>
               <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.6 }}>{feat.desc}</p>
             </motion.div>
@@ -245,7 +254,7 @@ export default function HomePage() {
       {/* ===== BRANCH MANAGER PUSH-BACK SCRIPT ===== */}
       <section style={{
         background: '#FFC107',
-        padding: '80px 40px',
+        padding: '120px 40px',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -257,14 +266,15 @@ export default function HomePage() {
           transform: 'translateY(-50%)',
           width: '320px',
           height: '320px',
-          background: 'rgba(255,255,255,0.15)',
+          background: 'rgba(255,255,255,0.25)',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 0,
-          backdropFilter: 'blur(4px)',
-          border: '2px solid rgba(255,255,255,0.3)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          boxShadow: '0 8px 32px rgba(255, 255, 255, 0.4)',
         }}>
           <HelpCircle size={160} color="rgba(0,76,143,0.3)" strokeWidth={1.2} />
         </div>
@@ -300,7 +310,7 @@ export default function HomePage() {
                     width: '100%',
                     background: openExcuse === excuse.id ? '#004C8F' : 'white',
                     border: 'none',
-                    padding: '18px 20px',
+                    padding: '24px 32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -373,7 +383,7 @@ export default function HomePage() {
       {/* ===== PARIVARTAN STYLE / IMPACT BANNER (Screenshot 4 Style) ===== */}
       <section style={{
         position: 'relative',
-        padding: '100px 40px',
+        padding: '120px 40px',
         display: 'flex',
         alignItems: 'center',
         background: '#E6EEF8',
@@ -428,10 +438,20 @@ export default function HomePage() {
                 { number: '14–36 mo', label: 'Average settlement time', color: '#ED232A' },
                 { number: '₹50,000+', label: 'Avg legal fees per family', color: '#004C8F' },
               ].map((stat, i) => (
-                <div key={i} style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', borderTop: `3px solid ${stat.color}` }}>
-                  <div style={{ fontSize: '26px', fontWeight: 800, color: stat.color, marginBottom: '4px' }}>{stat.number}</div>
-                  <div style={{ fontSize: '13px', color: '#64748B', fontWeight: 500 }}>{stat.label}</div>
-                </div>
+                <motion.div 
+                  key={i} 
+                  whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}
+                  style={{ 
+                    background: 'white', 
+                    padding: '24px', 
+                    borderRadius: '16px', 
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.04)', 
+                    borderLeft: `4px solid ${stat.color}`,
+                    transition: 'all 0.3s ease'
+                  }}>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: stat.color, marginBottom: '6px' }}>{stat.number}</div>
+                  <div style={{ fontSize: '14px', color: '#64748B', fontWeight: 500 }}>{stat.label}</div>
+                </motion.div>
               ))}
             </div>
 
