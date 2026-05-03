@@ -206,7 +206,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== BANKING SOLUTIONS / FEATURES (Screenshot 1 Style) ===== */}
-      <section style={{ padding: '120px 40px', background: 'white', textAlign: 'center' }}>
+      <section style={{ padding: '120px 40px', background: '#F8FAFC', textAlign: 'center' }}>
         <div style={{ marginBottom: '12px', fontSize: '13px', fontWeight: 700, color: '#004C8F', letterSpacing: '1.5px', textTransform: 'uppercase' }}>WHY DEATHLEDGER</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#1E293B', marginBottom: '8px', fontWeight: 700 }}>
           {T.feat_h2}
@@ -228,24 +228,24 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -6, boxShadow: '0 12px 32px rgba(0, 76, 143, 0.08)' }}
+              whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(0, 76, 143, 0.08)' }}
               style={{
-                background: '#F8FAFC',
+                background: 'white',
                 borderRadius: '16px',
-                padding: '40px 32px',
+                padding: '24px 36px',
                 textAlign: 'center',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
-                border: '1px solid #E2E8F0',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                border: '1px solid #e5e7eb',
                 transition: 'all 0.3s ease',
               }}
             >
-              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                <div style={{ background: 'rgba(0, 76, 143, 0.05)', padding: '16px', borderRadius: '50%' }}>
+              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ background: 'rgba(0, 76, 143, 0.1)', padding: '16px', borderRadius: '50%' }}>
                   {feat.icon}
                 </div>
               </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', marginBottom: '8px' }}>{feat.title}</h3>
-              <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.6 }}>{feat.desc}</p>
+              <h3 style={{ fontSize: '19px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>{feat.title}</h3>
+              <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.4 }}>{feat.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -438,14 +438,14 @@ export default function HomePage() {
                 { number: '14–36 mo', label: 'Average settlement time', color: '#ED232A' },
                 { number: '₹50,000+', label: 'Avg legal fees per family', color: '#004C8F' },
               ].map((stat, i) => (
-                <motion.div 
-                  key={i} 
+                <motion.div
+                  key={i}
                   whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}
-                  style={{ 
-                    background: 'white', 
-                    padding: '24px', 
-                    borderRadius: '16px', 
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.04)', 
+                  style={{
+                    background: 'white',
+                    padding: '24px',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
                     borderLeft: `4px solid ${stat.color}`,
                     transition: 'all 0.3s ease'
                   }}>
@@ -478,9 +478,6 @@ export default function HomePage() {
         </div>
         <p style={{ color: '#94A3B8', fontSize: '14px', marginBottom: '8px' }}>
           {T.footer_p}
-        </p>
-        <p style={{ color: '#64748B', fontSize: '12px' }}>
-          Cites RBI/2025-26/95 • Banking Regulation Act 1949 • IRDAI Guidelines 2024
         </p>
       </footer>
     </div>
