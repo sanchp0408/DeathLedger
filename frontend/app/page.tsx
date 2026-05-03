@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Shield, Search, ChevronRight, FileText, CheckCircle2, AlertCircle, Scale, Globe, Landmark, Clock, Bot, HelpCircle, ChevronDown, MessageSquare } from 'lucide-react';
 
 const EXCUSES = [
@@ -81,6 +81,10 @@ export default function HomePage() {
   const [isHindi, setIsHindi] = useState(false);
   const T = isHindi ? LANG.hi : LANG.en;
 
+  const { scrollY } = useScroll();
+  const parallaxBubble = useTransform(scrollY, [0, 3000], [0, 250]);
+  const parallaxBg = useTransform(scrollY, [0, 3000], [0, -150]);
+
   return (
     <div style={{ backgroundColor: '#F8FAFC' }}>
       {/* ===== NAV ===== */}
@@ -142,11 +146,12 @@ export default function HomePage() {
         overflow: 'hidden',
       }}>
         {/* Background Image */}
-        <div style={{
+        <motion.div style={{
           position: 'absolute',
           inset: 0,
           background: 'url("https://images.unsplash.com/photo-1607867856297-085b093eb8e8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG9sZCUyMHBlb3BsZSUyMGluZGlhbiUyMGltYWdlJTIwbGFuZHNjYXBlJTIwc3RyZXNzZWQlMjBleHByZXNzaW9ufGVufDB8fDB8fHww") center/cover',
           zIndex: 0,
+          y: parallaxBg,
         }} />
         {/* Gradient Overlay for text readability */}
         <div style={{
@@ -226,7 +231,7 @@ export default function HomePage() {
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.1 }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(0, 76, 143, 0.08)' }}
               style={{
@@ -264,19 +269,38 @@ export default function HomePage() {
           right: '4%',
           top: '50%',
           transform: 'translateY(-50%)',
-          width: '320px',
-          height: '320px',
-          background: 'rgba(255,255,255,0.25)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           zIndex: 0,
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.6)',
-          boxShadow: '0 8px 32px rgba(255, 255, 255, 0.4)',
         }}>
-          <HelpCircle size={160} color="rgba(0,76,143,0.3)" strokeWidth={1.2} />
+          <motion.div style={{ y: parallaxBubble }}>
+            <motion.div
+              animate={{ 
+                y: [-10, 10, -10],
+                boxShadow: [
+                  '0 4px 20px rgba(255, 215, 0, 0.15)',
+                  '0 0 60px rgba(255, 215, 0, 0.6)',
+                  '0 4px 20px rgba(255, 215, 0, 0.15)'
+                ]
+              }}
+              transition={{
+                duration: 6,
+                ease: "easeInOut",
+                repeat: Infinity,
+              }}
+              style={{
+                width: '320px',
+                height: '320px',
+                background: 'rgba(255,255,255,0.25)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.6)',
+              }}
+            >
+              <HelpCircle size={160} color="rgba(0,76,143,0.3)" strokeWidth={1.2} />
+            </motion.div>
+          </motion.div>
         </div>
 
         <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -299,7 +323,7 @@ export default function HomePage() {
                 key={excuse.id}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.1 }}
                 transition={{ delay: i * 0.07 }}
                 style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
               >
@@ -414,7 +438,7 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
             style={{ width: '50%', paddingLeft: '40px' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
