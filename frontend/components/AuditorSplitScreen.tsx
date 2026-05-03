@@ -58,6 +58,47 @@ export default function AuditorSplitScreen() {
   const [stepIdx, setStepIdx] = useState(0);
   const [selectedDocType, setSelectedDocType] = useState<string>('death_certificate');
 
+  // Split-pane resize state
+  const [leftWidth, setLeftWidth] = useState<number | undefined>(undefined);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const startDragging = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    e.preventDefault(); // prevent text selection
+  };
+
+  const onDrag = useCallback((e: MouseEvent) => {
+    if (!isDragging) return;
+    let newWidth = e.clientX;
+    if (newWidth < 350) newWidth = 350; // min-width for left panel
+    if (newWidth > window.innerWidth - 450) newWidth = window.innerWidth - 450; // max-width
+    setLeftWidth(newWidth);
+  }, [isDragging]);
+
+  const stopDragging = useCallback(() => {
+    if (isDragging) setIsDragging(false);
+  }, [isDragging]);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', onDrag);
+      window.addEventListener('mouseup', stopDragging);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      window.removeEventListener('mousemove', onDrag);
+      window.removeEventListener('mouseup', stopDragging);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+    return () => {
+      window.removeEventListener('mousemove', onDrag);
+      window.removeEventListener('mouseup', stopDragging);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging, onDrag, stopDragging]);
+
   useEffect(() => {
     const docs = INSTITUTION_RULES[institution]?.requiredDocs || [];
     if (docs.length > 0) {
@@ -339,28 +380,29 @@ export default function AuditorSplitScreen() {
         <div
           className="split-left"
           style={{
-            flex: 1,
-            borderRight: '1px solid var(--color-border)',
+            width: leftWidth !== undefined ? `${leftWidth}px` : undefined,
+            flex: leftWidth !== undefined ? `0 0 ${leftWidth}px` : 1,
+            minWidth: '350px',
             overflowY: 'auto',
-            padding: '24px',
+            padding: '32px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px',
+            gap: 'var(--section-gap, 32px)',
             background: 'var(--color-bg)',
           }}
         >
           {/* Institution Selector */}
           <div>
-            <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>
+            <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
               {t.selectInstitution}
             </label>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: '12px' }}>
               {Object.entries(INSTITUTION_RULES).map(([key, rule]) => (
                 <button
                   key={key}
                   onClick={() => setInstitution(key)}
                   style={{
-                    padding: '8px 16px',
+                    padding: '10px 16px',
                     borderRadius: 'var(--radius-sm)',
                     border: `2px solid ${institution === key ? INSTITUTION_COLORS[key] : 'var(--color-border)'}`,
                     background: institution === key ? INSTITUTION_COLORS[key] : 'white',
@@ -369,6 +411,7 @@ export default function AuditorSplitScreen() {
                     fontSize: '13px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    textAlign: 'center',
                   }}
                 >
                   {key}
@@ -376,73 +419,77 @@ export default function AuditorSplitScreen() {
               ))}
             </div>
             {institution && (
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {INSTITUTION_RULES[institution].name} • SLA: {INSTITUTION_RULES[institution].sladays} days • <Phone size={12} /> {INSTITUTION_RULES[institution].contact}
               </div>
             )}
           </div>
 
           {/* Nominee Toggle */}
-          <div className="card" style={{ padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: nomineeExists ? '12px' : '0' }}>
-              <label style={{ fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
-                {t.nomineeExists}
-              </label>
-              <button
-                className={`toggle-track ${nomineeExists ? 'active' : ''}`}
-                onClick={() => setNomineeExists(!nomineeExists)}
-                role="switch"
-                aria-checked={nomineeExists}
-              >
-                <div className="toggle-thumb" />
-              </button>
-            </div>
-
-            {nomineeExists && (
-              <div className="banner-info" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <strong><Scale size={14} /> Section 45ZA:</strong> {t.nomineeBannerText}
+          <div>
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: nomineeExists ? '16px' : '0' }}>
+                <label style={{ fontWeight: 600, fontSize: '14px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
+                  {t.nomineeExists}
+                </label>
+                <button
+                  className={`toggle-track ${nomineeExists ? 'active' : ''}`}
+                  onClick={() => setNomineeExists(!nomineeExists)}
+                  role="switch"
+                  aria-checked={nomineeExists}
+                >
+                  <div className="toggle-thumb" />
+                </button>
               </div>
-            )}
+
+              {nomineeExists && (
+                <div className="banner-info" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <strong><Scale size={14} /> Section 45ZA:</strong> {t.nomineeBannerText}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Claim Amount */}
           <div>
-            <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>
-              {t.claimAmount}
-            </label>
-            <div style={{ position: 'relative' }}>
-              <span style={{
-                position: 'absolute',
-                left: '14px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--color-text-muted)',
-                fontWeight: 600,
-              }}>₹</span>
-              <input
-                type="number"
-                className="input"
-                style={{ paddingLeft: '28px' }}
-                placeholder="e.g. 850000"
-                value={claimAmount ?? ''}
-                onChange={(e) => setClaimAmount(e.target.value ? Number(e.target.value) : null)}
-              />
-            </div>
-            {simplifiedProcedure && (
-              <div className="banner-success" style={{ marginTop: '8px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <CheckCircle size={14} /> {t.simplifiedProcedure}
+            <div className="card" style={{ padding: '20px', background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+              <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
+                {t.claimAmount}
+              </label>
+              <div style={{ position: 'relative' }}>
+                <span style={{
+                  position: 'absolute',
+                  left: '14px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--color-text-muted)',
+                  fontWeight: 600,
+                }}>₹</span>
+                <input
+                  type="number"
+                  className="input"
+                  style={{ paddingLeft: '28px', width: '100%', background: 'white' }}
+                  placeholder="e.g. 850000"
+                  value={claimAmount ?? ''}
+                  onChange={(e) => setClaimAmount(e.target.value ? Number(e.target.value) : null)}
+                />
               </div>
-            )}
+              {simplifiedProcedure && (
+                <div className="banner-success" style={{ marginTop: '12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle size={14} /> {t.simplifiedProcedure}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Upload Zone */}
           <div>
-            <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>
+            <label className="label-caps" style={{ display: 'block', marginBottom: '12px' }}>
               {t.uploadLabel}
             </label>
             
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>
                 Select Document Type:
               </label>
               <select 
@@ -460,14 +507,18 @@ export default function AuditorSplitScreen() {
             <div
               {...getRootProps()}
               className={`drop-zone ${isDragActive ? 'active' : ''}`}
-              style={{ marginBottom: uploadedFiles.length > 0 ? '12px' : '0' }}
+              style={{ 
+                padding: 'clamp(24px, 4vw, 36px) 24px',
+                marginBottom: uploadedFiles.length > 0 ? '16px' : '0',
+                background: isDragActive ? 'var(--color-primary-light)' : 'white'
+              }}
             >
               <input {...getInputProps()} />
-              <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'center' }}><FolderUp size={32} className="text-primary" /></div>
-              <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+              <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}><FolderUp size={36} className="text-primary" /></div>
+              <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                 {isDragActive ? 'Drop files here...' : t.dropDocuments}
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
                 {t.acceptedFormats} • Death Certificate, Aadhaar, PAN, Passbook, etc.
               </div>
             </div>
@@ -552,11 +603,31 @@ export default function AuditorSplitScreen() {
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
 
+        {/* ===== RESIZE GUTTER ===== */}
+        <div
+          onMouseDown={startDragging}
+          style={{
+            width: '6px',
+            cursor: 'col-resize',
+            background: isDragging ? 'var(--color-primary)' : 'transparent',
+            borderRight: '1px solid var(--color-border)',
+            flexShrink: 0,
+            transition: 'background 0.2s',
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => {
+            if (!isDragging) e.currentTarget.style.background = 'rgba(10, 61, 145, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            if (!isDragging) e.currentTarget.style.background = 'transparent';
+          }}
+        />
+
         {/* ===== RIGHT PANE ===== */}
         <div
           className="split-right"
           style={{
-            width: '450px',
+            flex: 1,
             minWidth: '450px',
             overflowY: 'auto',
             padding: '24px',
